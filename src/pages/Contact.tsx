@@ -3,6 +3,24 @@ import { motion } from 'motion/react';
 import { Phone, Mail, MapPin, Clock, MessageSquare } from 'lucide-react';
 
 export default function Contact() {
+  const handleContactSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    const name = String(formData.get('name') || '').trim();
+    const email = String(formData.get('email') || '').trim();
+    const subject = String(formData.get('subject') || '').trim();
+    const message = String(formData.get('message') || '').trim();
+
+    const mailSubject = encodeURIComponent(subject || 'Contactaanvraag via website');
+    const mailBody = encodeURIComponent(
+      `Naam: ${name}\nE-mail: ${email}\n\nBericht:\n${message}`,
+    );
+
+    window.location.href = `mailto:ademsade@gmail.com?subject=${mailSubject}&body=${mailBody}`;
+  };
+
   return (
     <div className="pt-16">
       <section className="py-24 bg-stone-50">
@@ -39,33 +57,33 @@ export default function Contact() {
               </div>
               <h4 className="font-bold text-lg mb-2">WhatsApp</h4>
               <p className="text-stone-500 mb-4">Snel een berichtje sturen.</p>
-              <a href="#" className="text-emerald-600 font-bold">Stuur een bericht</a>
+              <a href="https://wa.me/31752340037" target="_blank" rel="noopener noreferrer" className="text-emerald-600 font-bold">Stuur een bericht</a>
             </div>
           </div>
 
           <div className="bg-white rounded-3xl border border-stone-200 shadow-sm overflow-hidden grid lg:grid-cols-2">
             <div className="p-8 md:p-12">
               <h3 className="text-2xl font-bold mb-6">Stuur ons een bericht</h3>
-              <form className="space-y-4">
+              <form className="space-y-4" onSubmit={handleContactSubmit}>
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-bold text-stone-400 uppercase mb-2">Naam</label>
-                    <input type="text" className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none" />
+                    <input name="name" type="text" required className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none" />
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-stone-400 uppercase mb-2">E-mail</label>
-                    <input type="email" className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none" />
+                    <input name="email" type="email" required className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none" />
                   </div>
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-stone-400 uppercase mb-2">Onderwerp</label>
-                  <input type="text" className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none" />
+                  <input name="subject" type="text" required className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none" />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-stone-400 uppercase mb-2">Bericht</label>
-                  <textarea rows={4} className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none resize-none"></textarea>
+                  <textarea name="message" rows={4} required className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none resize-none"></textarea>
                 </div>
-                <button className="w-full bg-emerald-600 text-white py-4 rounded-xl font-bold hover:bg-emerald-700 transition-all">
+                <button type="submit" className="w-full bg-emerald-600 text-white py-4 rounded-xl font-bold hover:bg-emerald-700 transition-all">
                   Verstuur Bericht
                 </button>
               </form>
