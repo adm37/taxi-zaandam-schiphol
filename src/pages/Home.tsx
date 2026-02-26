@@ -116,7 +116,7 @@ export default function Home() {
     }
   }, [formData.passengers, formData.suitcases, formData.destination]);
 
-  const handleBookingSubmit = (e: React.FormEvent) => {
+  const handleBookingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Format address: Street [HouseNumber], City, Country
@@ -129,6 +129,29 @@ export default function Home() {
 
     const whatsappNumber = "31752340037";
     const totalPrice = vehicleInfo.price + (formData.paymentMethod === 'pin' ? 5 : 0);
+
+    try {
+      await fetch('/.netlify/functions/bookings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          phone: formData.phone,
+          pickup: formattedPickup,
+          destination: formData.destination,
+          date: formData.date,
+          time: formData.time,
+          passengers: formData.passengers,
+          suitcases: formData.suitcases,
+          vehicleType: vehicleInfo.type,
+          paymentMethod: formData.paymentMethod === 'pin' ? 'Pin / Creditcard' : 'Contant',
+          totalPrice,
+        }),
+      });
+    } catch {}
+
     const message = `*Schiphol Taxi Reservering*%0A%0A` +
       `*Naam:* ${formData.name}%0A` +
       `*Telefoon:* ${formData.phone}%0A` +

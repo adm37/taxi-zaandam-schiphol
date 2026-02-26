@@ -14,6 +14,7 @@ const Home = lazy(() => import('./pages/Home'));
 const Tarieven = lazy(() => import('./pages/Tarieven'));
 const OverOns = lazy(() => import('./pages/OverOns'));
 const Contact = lazy(() => import('./pages/Contact'));
+const Admin = lazy(() => import('./pages/Admin'));
 const Assendelft = lazy(() => import('./Assendelft'));
 const KoogAanDeZaan = lazy(() => import('./KoogAanDeZaan'));
 const Krommenie = lazy(() => import('./Krommenie'));
@@ -97,6 +98,8 @@ function AnimatedRoutes() {
             <Route path="/tarieven" element={<Tarieven />} />
             <Route path="/over-ons" element={<OverOns />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/admin" element={<Admin />} />
+            <Route path="/admin/" element={<Admin />} />
             <Route path="/taxi-assendelft-schiphol" element={<Assendelft />} />
             <Route path="/taxi-koog-aan-de-zaan-schiphol" element={<KoogAanDeZaan />} />
             <Route path="/taxi-krommenie-schiphol" element={<Krommenie />} />
@@ -168,26 +171,36 @@ function AnimatedRoutes() {
   );
 }
 
-export default function App() {
+function AppShell() {
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith('/admin');
+
   return (
-    <Router>
-      <div className="min-h-screen bg-stone-50 font-sans text-stone-900 flex flex-col">
-        <Navbar />
-        <main className="flex-grow">
-          <AnimatedRoutes />
-        </main>
-        <Footer />
-        
-        {/* Floating Action Button for Mobile */}
+    <div className="min-h-screen bg-stone-50 font-sans text-stone-900 flex flex-col">
+      {!isAdminRoute && <Navbar />}
+      <main className="flex-grow">
+        <AnimatedRoutes />
+      </main>
+      {!isAdminRoute && <Footer />}
+
+      {!isAdminRoute && (
         <div className="fixed bottom-6 right-6 md:hidden z-50">
-          <a 
-            href="tel:0752340037" 
+          <a
+            href="tel:0752340037"
             className="w-16 h-16 bg-emerald-600 text-white rounded-full flex items-center justify-center shadow-xl shadow-emerald-900/40 animate-bounce"
           >
             <Phone size={28} />
           </a>
         </div>
-      </div>
+      )}
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    <Router>
+      <AppShell />
     </Router>
   );
 }
