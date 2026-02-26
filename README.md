@@ -19,6 +19,16 @@ View your app in AI Studio: https://ai.studio/apps/d1616609-bfe3-4731-ae95-a2753
 3. Run the app:
    `npm run dev`
 
+## Google Maps autocomplete (booking form)
+
+Voor adres-autocomplete in het boekingsformulier moet tijdens build/deploy een Google Maps key beschikbaar zijn via één van deze variabelen:
+
+- `PUBLIC_GOOGLE_MAPS_API_KEY` (aanbevolen)
+- `VITE_GOOGLE_MAPS_API_KEY`
+- `GOOGLE_MAPS_API_KEY` (fallback)
+
+Zorg ook dat in Google Cloud de **Places API** en **Maps JavaScript API** aan staan, en dat de HTTP referrer van je live domein is toegestaan.
+
 ## Build
 
 Use:

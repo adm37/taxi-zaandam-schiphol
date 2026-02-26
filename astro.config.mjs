@@ -11,6 +11,9 @@ export default defineConfig({
     plugins: [tailwindcss()],
     define: {
       'process.env.GEMINI_API_KEY': JSON.stringify(process.env.GEMINI_API_KEY ?? ''),
+      'import.meta.env.GOOGLE_MAPS_API_KEY': JSON.stringify(
+        process.env.GOOGLE_MAPS_API_KEY ?? process.env.PUBLIC_GOOGLE_MAPS_API_KEY ?? process.env.VITE_GOOGLE_MAPS_API_KEY ?? '',
+      ),
     },
     resolve: {
       alias: {

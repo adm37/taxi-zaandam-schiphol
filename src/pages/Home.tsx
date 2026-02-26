@@ -21,7 +21,12 @@ import {
   Bus
 } from 'lucide-react';
 
-const googleMapsApiKey = import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY || import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+const googleMapsApiKey = (
+  import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY ||
+  import.meta.env.VITE_GOOGLE_MAPS_API_KEY ||
+  import.meta.env.GOOGLE_MAPS_API_KEY ||
+  ''
+).trim();
 
 const ZAANSTAD_LOCATIONS = [
   'Assendelft', 'Koog aan de Zaan', 'Krommenie', 'Westzaan', 'Wormer', 'Wormerveer', 'Zaandam', 'Zaandijk'
