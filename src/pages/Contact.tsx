@@ -1,9 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Phone, Mail, MapPin, Clock, MessageSquare } from 'lucide-react';
 
 export default function Contact() {
-  const handleContactSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitMessage, setSubmitMessage] = useState('');
+  const [submitError, setSubmitError] = useState(false);
+
+  const handleContactSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const form = event.currentTarget;
@@ -13,12 +17,36 @@ export default function Contact() {
     const subject = String(formData.get('subject') || '').trim();
     const message = String(formData.get('message') || '').trim();
 
-    const mailSubject = encodeURIComponent(subject || 'Contactaanvraag via website');
-    const mailBody = encodeURIComponent(
-      `Naam: ${name}\nE-mail: ${email}\n\nBericht:\n${message}`,
-    );
+    setIsSubmitting(true);
+    setSubmitMessage('');
+    setSubmitError(false);
 
-    window.location.href = `mailto:ademsade@gmail.com?subject=${mailSubject}&body=${mailBody}`;
+    try {
+      const response = await fetch('/.netlify/functions/send-contact-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          subject,
+          message,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Mail API request failed');
+      }
+
+      setSubmitMessage('Bedankt! Uw bericht is succesvol verzonden.');
+      form.reset();
+    } catch {
+      setSubmitError(true);
+      setSubmitMessage('Verzenden is mislukt. Probeer het opnieuw of bel 075 - 234 00 37.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -83,9 +111,14 @@ export default function Contact() {
                   <label className="block text-xs font-bold text-stone-400 uppercase mb-2">Bericht</label>
                   <textarea name="message" rows={4} required className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none resize-none"></textarea>
                 </div>
-                <button type="submit" className="w-full bg-emerald-600 text-white py-4 rounded-xl font-bold hover:bg-emerald-700 transition-all">
-                  Verstuur Bericht
+                <button type="submit" disabled={isSubmitting} className="w-full bg-emerald-600 text-white py-4 rounded-xl font-bold hover:bg-emerald-700 disabled:opacity-70 disabled:cursor-not-allowed transition-all">
+                  {isSubmitting ? 'Bezig met verzenden...' : 'Verstuur Bericht'}
                 </button>
+                {submitMessage && (
+                  <p className={`text-sm font-medium ${submitError ? 'text-red-600' : 'text-emerald-600'}`}>
+                    {submitMessage}
+                  </p>
+                )}
               </form>
             </div>
             <div className="bg-stone-900 p-8 md:p-12 text-white flex flex-col justify-center">
