@@ -1,0 +1,661 @@
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { motion } from 'motion/react';
+import Autocomplete from "react-google-autocomplete";
+import { 
+  MapPin, 
+  Calendar, 
+  Clock, 
+  ChevronRight, 
+  CheckCircle2, 
+  Wifi, 
+  Banknote, 
+  CreditCard,
+  Star,
+  ShieldCheck,
+  ThumbsUp,
+  HelpCircle,
+  Users,
+  Briefcase,
+  Car,
+  Bus
+} from 'lucide-react';
+
+const googleMapsApiKey = import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY || import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+
+const ZAANSTAD_LOCATIONS = [
+  'Assendelft', 'Koog aan de Zaan', 'Krommenie', 'Westzaan', 'Wormer', 'Wormerveer', 'Zaandam', 'Zaandijk'
+];
+
+const FAQS = [
+  {
+    question: "Wat kost een taxi van Zaanstad naar Schiphol?",
+    answer: "Bij ZaanTaxi Schiphol betaalt u een vast tarief van slechts €50 vanuit elke plek in Zaanstad (Zaandam, Krommenie, Assendelft, etc.) naar Schiphol Airport."
+  },
+  {
+    question: "Hoe kan ik een taxi reserveren?",
+    answer: "U kunt eenvoudig online reserveren via ons boekingsformulier op de website of direct bellen naar 075 - 234 00 37 voor een directe bevestiging."
+  },
+  {
+    question: "Rijden jullie ook 's nachts?",
+    answer: "Ja, wij zijn 24 uur per dag, 7 dagen per week bereikbaar en beschikbaar voor al uw ritten naar de luchthaven."
+  },
+  {
+    question: "Kan ik met pin of creditcard betalen?",
+    answer: "Zeker! Al onze taxi's zijn uitgerust met moderne pinautomaten. U kunt betalen met Pin, Creditcard of contant."
+  }
+];
+
+export default function Home() {
+  const [bookingStep, setBookingStep] = useState(1);
+  const [formData, setFormData] = useState({
+    pickup: '',
+    houseNumber: '',
+    destination: 'Schiphol Airport',
+    date: '',
+    time: '',
+    passengers: 1,
+    suitcases: 0,
+    paymentMethod: 'contant',
+    name: '',
+    phone: ''
+  });
+
+  const [vehicleInfo, setVehicleInfo] = useState({
+    type: 'Sedan',
+    price: 50,
+    icon: Car
+  });
+
+  useEffect(() => {
+    // Logic for vehicle selection
+    // Sedan: 1-4 passengers, max 3 suitcases
+    // Bus: 5-7 passengers, or > 3 suitcases
+    let isBus = false;
+    if (formData.passengers > 4 || formData.suitcases > 3) {
+      isBus = true;
+    }
+
+    let price = 0;
+    switch (formData.destination) {
+      case 'Rotterdam The Hague Airport':
+        price = isBus ? 200 : 165;
+        break;
+      case 'Eindhoven Airport':
+        price = isBus ? 365 : 295;
+        break;
+      case 'Brussels Airport (Zaventem)':
+        price = isBus ? 590 : 480;
+        break;
+      case 'Düsseldorf Airport':
+        price = isBus ? 580 : 470;
+        break;
+      case 'Schiphol Airport':
+      default:
+        price = isBus ? 75 : 50;
+        break;
+    }
+
+    if (isBus) {
+      setVehicleInfo({
+        type: 'Taxibus',
+        price: price,
+        icon: Bus
+      });
+    } else {
+      setVehicleInfo({
+        type: 'Sedan',
+        price: price,
+        icon: Car
+      });
+    }
+  }, [formData.passengers, formData.suitcases, formData.destination]);
+
+  const handleBookingSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Format address: Street [HouseNumber], City, Country
+    const addressParts = formData.pickup.split(',');
+    const street = addressParts[0].trim();
+    const cityAndRest = addressParts.slice(1).join(',').trim();
+    const formattedPickup = cityAndRest 
+      ? `${street} ${formData.houseNumber}, ${cityAndRest}` 
+      : `${street} ${formData.houseNumber}`;
+
+    const whatsappNumber = "31752340037";
+    const totalPrice = vehicleInfo.price + (formData.paymentMethod === 'pin' ? 5 : 0);
+    const message = `*Schiphol Taxi Reservering*%0A%0A` +
+      `*Naam:* ${formData.name}%0A` +
+      `*Telefoon:* ${formData.phone}%0A` +
+      `*Ophaaladres:* ${formattedPickup}%0A` +
+      `*Bestemming:* ${formData.destination}%0A` +
+      `*Datum:* ${formData.date}%0A` +
+      `*Tijd:* ${formData.time}%0A` +
+      `*Passagiers:* ${formData.passengers}%0A` +
+      `*Koffers:* ${formData.suitcases}%0A` +
+      `*Voertuig:* ${vehicleInfo.type}%0A` +
+      `*Betaalmethode:* ${formData.paymentMethod === 'pin' ? 'Pin / Creditcard (+€5)' : 'Contant'}%0A` +
+      `*Totaal Prijs:* €${totalPrice}`;
+
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${message}`;
+    
+    // Open WhatsApp in a new tab
+    window.open(whatsappUrl, '_blank');
+
+    alert(`Bedankt voor uw aanvraag, ${formData.name}! Uw boeking wordt nu geopend in WhatsApp.`);
+    
+    setBookingStep(1);
+    setFormData({
+      pickup: '',
+      houseNumber: '',
+      destination: 'Schiphol Airport',
+      date: '',
+      time: '',
+      passengers: 1,
+      suitcases: 0,
+      paymentMethod: 'contant',
+      name: '',
+      phone: ''
+    });
+  };
+
+  const today = new Date().toISOString().split('T')[0];
+
+  // JSON-LD Schema for LocalBusiness
+  useEffect(() => {
+    const schemaData = {
+      "@context": "https://schema.org",
+      "@type": "TaxiService",
+      "name": "ZaanTaxi Schiphol",
+      "description": "Betrouwbare taxi service van Zaanstad naar Schiphol voor een vast tarief van €50.",
+      "url": window.location.origin,
+      "telephone": "+31752340037",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Zaanstad",
+        "addressRegion": "Noord-Holland",
+        "addressCountry": "NL"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": "52.4420",
+        "longitude": "4.8292"
+      },
+      "areaServed": ["Zaandam", "Krommenie", "Assendelft", "Wormer", "Wormerveer", "Zaandijk", "Koog aan de Zaan", "Westzaan"],
+      "priceRange": "€50"
+    };
+
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.innerHTML = JSON.stringify(schemaData);
+    document.head.appendChild(script);
+
+    return () => {
+      document.head.removeChild(script);
+    };
+  }, []);
+
+  return (
+    <div className="pt-16">
+      {/* Hero Section */}
+      <section className="relative pt-16 pb-20 px-4 bg-stone-50 overflow-hidden">
+        {/* Background Image with Gradient Fade */}
+        <div className="absolute inset-0 z-0">
+          <div className="absolute right-0 top-0 bottom-0 w-full lg:w-3/4">
+            <div className="absolute inset-0 bg-gradient-to-r from-stone-50 via-stone-50/80 to-transparent z-10" />
+            <div className="absolute inset-0 bg-gradient-to-t from-stone-50 via-stone-50/40 to-transparent lg:hidden z-10" />
+            <img 
+              src="https://images.pexels.com/photos/1483146/pexels-photo-1483146.jpeg?_gl=1*h8wjj9*_ga*MTI5MjAxNTE0Ni4xNzY2NDg3MDY0*_ga_8JE65Q40S6*czE3NjcxNzk4ODEkbzMkZzEkdDE3NjcxNzk5MDckajM0JGwwJGgw" 
+              alt="Taxi Background" 
+              className="w-full h-full object-cover object-right"
+            />
+          </div>
+        </div>
+
+        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center relative z-10">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <div className="inline-flex items-center gap-2 bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-sm font-bold mb-6">
+              <CheckCircle2 size={16} />
+              Taxi Zaanstad Schiphol Specialist
+            </div>
+            <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-stone-900 mb-6 leading-[1.1]">
+              Taxi van <span className="text-emerald-600">Zaanstad</span> naar Schiphol voor <span className="text-emerald-600">€50</span>
+            </h1>
+            <p className="text-xl text-stone-600 mb-8 max-w-lg leading-relaxed">
+              Zoekt u een betrouwbare taxi van Zaandam, Krommenie, Assendelft of Wormer naar Schiphol? Bij ons profiteert u van een <strong>vast laag tarief</strong> zonder verrassingen.
+            </p>
+            
+            <div className="flex flex-wrap gap-4 mb-8">
+              <div className="flex items-center gap-2 text-stone-500 bg-white px-4 py-2 rounded-xl shadow-sm border border-stone-100">
+                <Wifi size={18} className="text-emerald-500" />
+                <span className="text-sm font-medium">Gratis WiFi</span>
+              </div>
+              <div className="flex items-center gap-2 text-stone-500 bg-white px-4 py-2 rounded-xl shadow-sm border border-stone-100">
+                <Banknote size={18} className="text-emerald-500" />
+                <span className="text-sm font-medium">Contant</span>
+              </div>
+              <div className="flex items-center gap-2 text-stone-500 bg-white px-4 py-2 rounded-xl shadow-sm border border-stone-100">
+                <CreditCard size={18} className="text-emerald-500" />
+                <span className="text-sm font-medium">Pin/Creditcard</span>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Booking Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="bg-white p-8 rounded-3xl shadow-2xl shadow-stone-200 border border-stone-100 relative overflow-hidden"
+          >
+            <div className="absolute top-0 right-0 p-4">
+              <div className="bg-emerald-600 text-white text-xs font-bold px-3 py-1 rounded-full">
+                STAP {bookingStep} VAN 4
+              </div>
+            </div>
+
+            <h2 className="text-2xl font-bold mb-6">Direct Taxi Reserveren</h2>
+            
+            <form onSubmit={handleBookingSubmit} className="space-y-4">
+              {bookingStep === 1 && (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="col-span-2">
+                      <label className="block text-xs font-bold text-stone-400 uppercase mb-2">Ophaaladres (Straat)</label>
+                      <div className="relative">
+                        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 z-10" size={18} />
+                        <Autocomplete
+                          apiKey={googleMapsApiKey}
+                          onPlaceSelected={(place) => {
+                            setFormData({...formData, pickup: place.formatted_address || ''});
+                          }}
+                          options={{
+                            types: ["address"],
+                            componentRestrictions: { country: "nl" },
+                            bounds: {
+                              north: 52.55,
+                              south: 52.40,
+                              east: 4.90,
+                              west: 4.75,
+                            },
+                            strictBounds: true,
+                          }}
+                          className="w-full pl-10 pr-4 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"
+                          placeholder="Voer uw straat in..."
+                          defaultValue={formData.pickup}
+                          onChange={(e: any) => setFormData({...formData, pickup: e.target.value})}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-stone-400 uppercase mb-2">Huisnr.</label>
+                      <input 
+                        type="text" 
+                        required
+                        placeholder="12A"
+                        className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"
+                        value={formData.houseNumber}
+                        onChange={(e) => setFormData({...formData, houseNumber: e.target.value})}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-stone-400 uppercase mb-2">Bestemming</label>
+                    <div className="relative">
+                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" size={18} />
+                      <select 
+                        className="w-full pl-10 pr-4 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none appearance-none"
+                        value={formData.destination}
+                        onChange={(e) => setFormData({...formData, destination: e.target.value})}
+                      >
+                        <option value="Schiphol Airport">Schiphol Airport</option>
+                        <option value="Rotterdam The Hague Airport">Rotterdam The Hague Airport</option>
+                        <option value="Eindhoven Airport">Eindhoven Airport</option>
+                        <option value="Brussels Airport (Zaventem)">Brussels Airport (Zaventem)</option>
+                        <option value="Düsseldorf Airport">Düsseldorf Airport</option>
+                      </select>
+                    </div>
+                  </div>
+                  <button 
+                    type="button"
+                    disabled={!formData.pickup || !formData.houseNumber || !formData.destination}
+                    onClick={() => setBookingStep(2)}
+                    className="w-full bg-emerald-600 text-white py-4 rounded-xl font-bold hover:bg-emerald-700 disabled:opacity-50 transition-all flex items-center justify-center gap-2 group"
+                  >
+                    Volgende Stap
+                    <ChevronRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                  </button>
+                </motion.div>
+              )}
+
+              {bookingStep === 2 && (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-stone-400 uppercase mb-2">Datum</label>
+                      <div className="relative">
+                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" size={18} />
+                        <input 
+                          type="date" 
+                          required
+                          min={today}
+                          className="w-full pl-10 pr-4 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"
+                          value={formData.date}
+                          onChange={(e) => setFormData({...formData, date: e.target.value})}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-stone-400 uppercase mb-2">Ophaaltijd</label>
+                      <div className="relative">
+                        <Clock className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" size={18} />
+                        <input 
+                          type="time" 
+                          required
+                          className="w-full pl-10 pr-4 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"
+                          value={formData.time}
+                          onChange={(e) => setFormData({...formData, time: e.target.value})}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex gap-4">
+                    <button type="button" onClick={() => setBookingStep(1)} className="flex-1 bg-stone-100 text-stone-600 py-4 rounded-xl font-bold hover:bg-stone-200 transition-all">Terug</button>
+                    <button 
+                      type="button"
+                      disabled={!formData.date || !formData.time}
+                      onClick={() => setBookingStep(3)}
+                      className="flex-[2] bg-emerald-600 text-white py-4 rounded-xl font-bold hover:bg-emerald-700 disabled:opacity-50 transition-all flex items-center justify-center gap-2 group"
+                    >
+                      Volgende Stap
+                      <ChevronRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+
+              {bookingStep === 3 && (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-stone-400 uppercase mb-2">Passagiers</label>
+                      <div className="relative">
+                        <Users className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" size={18} />
+                        <select 
+                          className="w-full pl-10 pr-4 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none appearance-none"
+                          value={formData.passengers}
+                          onChange={(e) => setFormData({...formData, passengers: parseInt(e.target.value)})}
+                        >
+                          {[1,2,3,4,5,6,7].map(n => <option key={n} value={n}>{n} {n === 1 ? 'Persoon' : 'Personen'}</option>)}
+                        </select>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-stone-400 uppercase mb-2">Koffers</label>
+                      <div className="relative">
+                        <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" size={18} />
+                        <select 
+                          className="w-full pl-10 pr-4 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none appearance-none"
+                          value={formData.suitcases}
+                          onChange={(e) => setFormData({...formData, suitcases: parseInt(e.target.value)})}
+                        >
+                          {[0,1,2,3,4,5,6,7,8].map(n => <option key={n} value={n}>{n} {n === 1 ? 'Koffer' : 'Koffers'}</option>)}
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-stone-400 uppercase mb-2">Betaalmethode</label>
+                    <div className="grid grid-cols-2 gap-4">
+                      <button
+                        type="button"
+                        onClick={() => setFormData({...formData, paymentMethod: 'contant'})}
+                        className={`py-3 rounded-xl font-bold border transition-all ${formData.paymentMethod === 'contant' ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-stone-50 text-stone-600 border-stone-200'}`}
+                      >
+                        Contant
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setFormData({...formData, paymentMethod: 'pin'})}
+                        className={`py-3 rounded-xl font-bold border transition-all ${formData.paymentMethod === 'pin' ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-stone-50 text-stone-600 border-stone-200'}`}
+                      >
+                        Pin / Creditcard
+                      </button>
+                    </div>
+                    {formData.paymentMethod === 'pin' && (
+                      <p className="text-[10px] text-emerald-600 mt-1 font-bold">* Bij pinnen of creditcard komt er een toeslag van €5 bij.</p>
+                    )}
+                  </div>
+
+                  <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-100 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-emerald-600 text-white rounded-full flex items-center justify-center">
+                        <vehicleInfo.icon size={20} />
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-emerald-600 uppercase tracking-wider">Geselecteerd voertuig</p>
+                        <p className="font-bold text-stone-900">{vehicleInfo.type}</p>
+                        <p className="text-[10px] text-stone-500">
+                          {vehicleInfo.type === 'Sedan' 
+                            ? 'Max. 4 pers. & 3 koffers' 
+                            : 'Max. 7 pers. & 8 koffers'}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs font-bold text-stone-400 uppercase tracking-wider">Totaal Prijs</p>
+                      <p className="text-2xl font-black text-emerald-600">€{vehicleInfo.price + (formData.paymentMethod === 'pin' ? 5 : 0)}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-4">
+                    <button type="button" onClick={() => setBookingStep(2)} className="flex-1 bg-stone-100 text-stone-600 py-4 rounded-xl font-bold hover:bg-stone-200 transition-all">Terug</button>
+                    <button 
+                      type="button"
+                      onClick={() => setBookingStep(4)}
+                      className="flex-[2] bg-emerald-600 text-white py-4 rounded-xl font-bold hover:bg-emerald-700 transition-all flex items-center justify-center gap-2 group"
+                    >
+                      Laatste Stap
+                      <ChevronRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+
+              {bookingStep === 4 && (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-bold text-stone-400 uppercase mb-2">Uw Volledige Naam</label>
+                    <input 
+                      type="text" 
+                      placeholder="Bijv. Jan de Vries"
+                      required
+                      className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"
+                      value={formData.name}
+                      onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-stone-400 uppercase mb-2">Telefoonnummer</label>
+                    <input 
+                      type="tel" 
+                      placeholder="06 12345678"
+                      required
+                      className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"
+                      value={formData.phone}
+                      onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                    />
+                  </div>
+                  <div className="flex gap-4">
+                    <button type="button" onClick={() => setBookingStep(3)} className="flex-1 bg-stone-100 text-stone-600 py-4 rounded-xl font-bold hover:bg-stone-200 transition-all">Terug</button>
+                    <button 
+                      type="submit"
+                      disabled={!formData.name || !formData.phone}
+                      className="flex-[2] bg-emerald-600 text-white py-4 rounded-xl font-bold hover:bg-emerald-700 disabled:opacity-50 transition-all shadow-lg shadow-emerald-200"
+                    >
+                      Bevestig Boeking (€{vehicleInfo.price + (formData.paymentMethod === 'pin' ? 5 : 0)})
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </form>
+            
+            <p className="mt-6 text-center text-stone-400 text-sm">
+              Liever telefonisch reserveren? <a href="tel:0752340037" className="text-emerald-600 font-bold hover:underline">075 - 234 00 37</a>
+              <br />
+              <span className="text-[10px] mt-1 block">* Bij pinnen of creditcard komt er een toeslag van €5 bij.</span>
+            </p>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* SEO Content Section */}
+      <section className="py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="grid md:grid-cols-3 gap-12">
+            <div className="md:col-span-2">
+              <h2 className="text-3xl md:text-4xl font-bold mb-6 text-stone-900">Waarom kiezen voor onze Taxi Service in Zaanstad?</h2>
+              <div className="prose prose-stone max-w-none text-stone-600 leading-relaxed space-y-4">
+                <p>
+                  Wanneer u op reis gaat, wilt u zich geen zorgen maken over het vervoer naar de luchthaven. ZaanTaxi Schiphol is de specialist in <strong>luchthavenvervoer vanuit de Zaanstreek</strong>. Of u nu in Zaandam, Krommenie, Assendelft, Wormer of Wormerveer woont, wij staan voor u klaar.
+                </p>
+                <p>
+                  Onze dienstverlening kenmerkt zich door stiptheid, comfort en transparantie. Met ons <strong>vaste tarief van €50</strong> weet u precies waar u aan toe bent. Geen tikkende meters in de file op de A8 of A10, maar een eerlijke prijs voor een hoogwaardige rit.
+                </p>
+                <h3 className="text-xl font-bold text-stone-900 pt-4">Voordelen van ZaanTaxi Schiphol:</h3>
+                <ul className="list-none space-y-2">
+                  <li className="flex items-center gap-2"><CheckCircle2 size={18} className="text-emerald-500" /> 24/7 Beschikbaar voor vroege en late vluchten.</li>
+                  <li className="flex items-center gap-2"><CheckCircle2 size={18} className="text-emerald-500" /> Professionele chauffeurs met uitgebreide regiokennis.</li>
+                  <li className="flex items-center gap-2"><CheckCircle2 size={18} className="text-emerald-500" /> Moderne, schone voertuigen voor optimaal comfort.</li>
+                  <li className="flex items-center gap-2"><CheckCircle2 size={18} className="text-emerald-500" /> Eenvoudig online of telefonisch reserveren.</li>
+                </ul>
+              </div>
+            </div>
+            <div className="space-y-8">
+              <div className="bg-stone-50 p-8 rounded-3xl border border-stone-100">
+                <ShieldCheck className="text-emerald-600 mb-4" size={40} />
+                <h4 className="text-xl font-bold mb-2">Veilig & Gecertificeerd</h4>
+                <p className="text-stone-500 text-sm">Al onze chauffeurs zijn in het bezit van de vereiste papieren en onze voertuigen voldoen aan de hoogste veiligheidseisen.</p>
+              </div>
+              <div className="bg-stone-50 p-8 rounded-3xl border border-stone-100">
+                <ThumbsUp className="text-emerald-600 mb-4" size={40} />
+                <h4 className="text-xl font-bold mb-2">100% Tevredenheidsgarantie</h4>
+                <p className="text-stone-500 text-sm">Wij doen er alles aan om uw reis zo soepel mogelijk te laten verlopen. Uw comfort is onze prioriteit.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Locations Section */}
+      <section className="py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-stone-900">Onze Werkgebieden in de Zaanstreek</h2>
+            <p className="text-stone-600 max-w-2xl mx-auto">
+              Wij bieden onze taxi service aan in de gehele Zaanstreek. Klik op uw woonplaats voor meer informatie over onze diensten en tarieven naar Schiphol.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {ZAANSTAD_LOCATIONS.map((loc) => {
+              const slug = loc.toLowerCase().replace(/\s+/g, '-');
+              const descriptions: Record<string, string> = {
+                'Assendelft': 'Snel en comfortabel vanuit Saendelft of Kreekrijk naar de luchthaven.',
+                'Koog aan de Zaan': 'Betrouwbaar vervoer vanuit Westerkoog en Oud-Koog.',
+                'Krommenie': 'Uw vaste taxi partner in Krommenie voor een zorgeloze reis.',
+                'Westzaan': 'Persoonlijke service vanuit het karakteristieke Westzaan.',
+                'Wormer': 'Altijd op tijd voor uw vlucht vanuit het hart van Wormer.',
+                'Wormerveer': 'Luxe vervoer tegen een scherp tarief vanuit Wormerveer.',
+                'Zaandam': 'De grootste taxi specialist in alle wijken van Zaandam.',
+                'Zaandijk': 'Vaste lage prijzen vanuit Rooswijk en Oud-Zaandijk.'
+              };
+              return (
+                <Link 
+                  key={loc} 
+                  to={`/taxi-${slug}-schiphol`}
+                  className="group p-6 rounded-2xl bg-stone-50 border border-stone-100 hover:bg-emerald-50 hover:border-emerald-200 transition-all"
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-all">
+                      <MapPin size={20} />
+                    </div>
+                    <h3 className="font-bold text-stone-900 group-hover:text-emerald-700 transition-colors">{loc}</h3>
+                  </div>
+                  <p className="text-stone-500 text-sm leading-relaxed">
+                    {descriptions[loc] || `Professioneel taxi vervoer van ${loc} naar Schiphol voor €50.`}
+                  </p>
+                  <div className="mt-4 flex items-center gap-1 text-emerald-600 text-xs font-bold uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity">
+                    Bekijk Tarieven <ChevronRight size={14} />
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-24 bg-stone-50">
+        <div className="max-w-4xl mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Veelgestelde Vragen (FAQ)</h2>
+            <p className="text-stone-600">Alles wat u moet weten over uw taxi van Zaanstad naar Schiphol.</p>
+          </div>
+          <div className="space-y-4">
+            {FAQS.map((faq, index) => (
+              <details key={index} className="group bg-white rounded-2xl border border-stone-200 overflow-hidden">
+                <summary className="flex items-center justify-between p-6 cursor-pointer list-none">
+                  <span className="font-bold text-stone-900 flex items-center gap-3">
+                    <HelpCircle size={20} className="text-emerald-600" />
+                    {faq.question}
+                  </span>
+                  <span className="transition-transform group-open:rotate-180">
+                    <ChevronRight size={20} />
+                  </span>
+                </summary>
+                <div className="px-6 pb-6 text-stone-600 leading-relaxed">
+                  {faq.answer}
+                </div>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing Banner */}
+      <section className="py-12 bg-emerald-600 overflow-hidden relative">
+        <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
+          <div className="flex whitespace-nowrap animate-marquee">
+            {[...Array(10)].map((_, i) => (
+              <span key={i} className="text-9xl font-black text-white mx-8">€50 VASTE PRIJS</span>
+            ))}
+          </div>
+        </div>
+        <div className="max-w-7xl mx-auto px-4 relative z-10 text-center">
+          <h2 className="text-white text-3xl md:text-5xl font-black uppercase tracking-tighter mb-4">
+            Betrouwbaar Luchthavenvervoer
+          </h2>
+          <p className="text-emerald-100 text-lg font-medium">
+            Vanuit Zaandam, Krommenie, Assendelft, Wormer of Wormerveer: Altijd €50 naar Schiphol.
+          </p>
+        </div>
+      </section>
+
+      <style>{`
+        @keyframes marquee {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .animate-marquee {
+          display: inline-flex;
+          animation: marquee 30s linear infinite;
+        }
+      `}</style>
+    </div>
+  );
+}

@@ -1,0 +1,52 @@
+---
+interface Props {
+  title: string;
+  description: string;
+  keywords?: string;
+  canonicalUrl: string;
+  ogTitle: string;
+  ogDescription: string;
+  ogUrl: string;
+  ogType: string;
+  ogImage: string;
+  localBusinessJsonLd?: Record<string, unknown>;
+  breadcrumbJsonLd?: Record<string, unknown>;
+}
+
+const {
+  title,
+  description,
+  keywords,
+  canonicalUrl,
+  ogTitle,
+  ogDescription,
+  ogUrl,
+  ogType,
+  ogImage,
+  localBusinessJsonLd,
+  breadcrumbJsonLd,
+} = Astro.props;
+---
+
+<title>{title}</title>
+<meta name="description" content={description} />
+{keywords && <meta name="keywords" content={keywords} />}
+<link rel="canonical" href={canonicalUrl} />
+
+<meta property="og:title" content={ogTitle} />
+<meta property="og:description" content={ogDescription} />
+<meta property="og:url" content={ogUrl} />
+<meta property="og:type" content={ogType} />
+<meta property="og:image" content={ogImage} />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={ogTitle} />
+<meta name="twitter:description" content={ogDescription} />
+<meta name="twitter:image" content={ogImage} />
+
+{localBusinessJsonLd && (
+  <script type="application/ld+json" set:html={JSON.stringify(localBusinessJsonLd)} />
+)}
+{breadcrumbJsonLd && (
+  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbJsonLd)} />
+)}

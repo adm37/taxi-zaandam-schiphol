@@ -1,0 +1,20 @@
+---
+import SeoHead from '../components/SeoHead.astro';
+
+import App from '../../src/App';
+import { getSeoForPath } from '../../src/constants/seo';
+import '../../src/index.css';
+
+const seo = getSeoForPath('/');
+---
+
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <SeoHead {...seo} />
+  </head>
+  <body>
+    <App client:only="react" />
+  </body>
+</html>

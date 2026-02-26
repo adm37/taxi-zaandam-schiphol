@@ -1,0 +1,51 @@
+---
+import { locationsData } from '../../src/constants/locations';
+import { getSeoForPath } from '../../src/constants/seo';
+import SeoHead from '../components/SeoHead.astro';
+
+import App from '../../src/App';
+import '../../src/index.css';
+
+const slugPath = Astro.params.slug ? `/${Astro.params.slug}` : '/';
+const seo = getSeoForPath(slugPath);
+
+export function getStaticPaths() {
+  const airportSlugs = [
+    'rotterdam-airport',
+    'rotterdam-the-hague-airport',
+    'eindhoven-airport',
+    'brussel-airport',
+    'brussels-airport',
+    'zaventem-airport',
+    'dusseldorf-airport',
+  ];
+
+  const locationSlugs = Object.keys(locationsData);
+  const staticRoutes = [
+    '/tarieven',
+    '/over-ons',
+    '/contact',
+    ...locationSlugs.map((location) => `/taxi-${location}-schiphol`),
+    ...locationSlugs.flatMap((location) =>
+      airportSlugs.map((airport) => `/taxi-${location}-${airport}`),
+    ),
+  ];
+
+  return staticRoutes.map((route) => ({
+    params: {
+      slug: route.replace(/^\//, ''),
+    },
+  }));
+}
+---
+
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <SeoHead {...seo} />
+  </head>
+  <body>
+    <App client:only="react" />
+  </body>
+</html>
