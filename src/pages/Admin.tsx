@@ -30,6 +30,16 @@ export default function Admin() {
 
   const isLoggedIn = useMemo(() => token.length > 0, [token]);
 
+  const readLocalBookings = (): Booking[] => {
+    try {
+      const raw = localStorage.getItem('local-bookings') || '[]';
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  };
+
   const loadBookings = async (activeToken: string) => {
     setIsLoading(true);
     setErrorMessage('');
@@ -43,14 +53,23 @@ export default function Admin() {
       });
 
       if (!response.ok) {
-        throw new Error('Kon ritten niet ophalen');
+        if (response.status === 401) {
+          throw new Error('unauthorized');
+        }
+
+        throw new Error('endpoint-unavailable');
       }
 
       const data = (await response.json()) as { bookings?: Booking[] };
       setBookings(Array.isArray(data.bookings) ? data.bookings : []);
-    } catch {
-      setErrorMessage('Inloggen mislukt of ritten konden niet geladen worden.');
-      setBookings([]);
+    } catch (error) {
+      if (error instanceof Error && error.message === 'unauthorized') {
+        setErrorMessage('Inloggen mislukt of ritten konden niet geladen worden.');
+        setBookings([]);
+      } else {
+        setBookings(readLocalBookings());
+        setErrorMessage('');
+      }
     } finally {
       setIsLoading(false);
     }

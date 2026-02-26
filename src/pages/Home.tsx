@@ -116,6 +116,34 @@ export default function Home() {
     }
   }, [formData.passengers, formData.suitcases, formData.destination]);
 
+  const saveBookingToLocalStorage = (booking: {
+    name: string;
+    phone: string;
+    pickup: string;
+    destination: string;
+    date: string;
+    time: string;
+    passengers: number;
+    suitcases: number;
+    vehicleType: string;
+    paymentMethod: string;
+    totalPrice: number;
+  }) => {
+    try {
+      const existingRaw = localStorage.getItem('local-bookings') || '[]';
+      const existing = JSON.parse(existingRaw);
+      const list = Array.isArray(existing) ? existing : [];
+
+      list.unshift({
+        id: `local-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+        createdAt: new Date().toISOString(),
+        ...booking,
+      });
+
+      localStorage.setItem('local-bookings', JSON.stringify(list.slice(0, 500)));
+    } catch {}
+  };
+
   const handleBookingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -129,6 +157,21 @@ export default function Home() {
 
     const whatsappNumber = "31752340037";
     const totalPrice = vehicleInfo.price + (formData.paymentMethod === 'pin' ? 5 : 0);
+    const bookingPayload = {
+      name: formData.name,
+      phone: formData.phone,
+      pickup: formattedPickup,
+      destination: formData.destination,
+      date: formData.date,
+      time: formData.time,
+      passengers: formData.passengers,
+      suitcases: formData.suitcases,
+      vehicleType: vehicleInfo.type,
+      paymentMethod: formData.paymentMethod === 'pin' ? 'Pin / Creditcard' : 'Contant',
+      totalPrice,
+    };
+
+    saveBookingToLocalStorage(bookingPayload);
 
     try {
       await fetch('/.netlify/functions/bookings', {
@@ -136,19 +179,7 @@ export default function Home() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          name: formData.name,
-          phone: formData.phone,
-          pickup: formattedPickup,
-          destination: formData.destination,
-          date: formData.date,
-          time: formData.time,
-          passengers: formData.passengers,
-          suitcases: formData.suitcases,
-          vehicleType: vehicleInfo.type,
-          paymentMethod: formData.paymentMethod === 'pin' ? 'Pin / Creditcard' : 'Contant',
-          totalPrice,
-        }),
+        body: JSON.stringify(bookingPayload),
       });
     } catch {}
 
