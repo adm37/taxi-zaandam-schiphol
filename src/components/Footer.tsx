@@ -48,7 +48,7 @@ export default function Footer() {
         </div>
       </div>
       <div className="max-w-7xl mx-auto px-4 mt-20 pt-8 border-t border-stone-800 text-xs flex flex-col md:flex-row justify-between items-center gap-4">
-        <p>&copy; {new Date().getFullYear()} ZaanTaxi Schiphol. Alle rechten voorbehouden. KVK: 12345678</p>
+        <p>&copy; {new Date().getFullYear()} ZaanTaxi Schiphol. Alle rechten voorbehouden.</p>
         <div className="flex gap-6">
           <li className="flex items-center gap-2">
             <Phone size={14} className="text-emerald-500" />
