@@ -35,6 +35,10 @@ export default function OverOns() {
               <img 
                 src="https://i.ibb.co/YFwc4rhk/Schermafbeelding-2026-02-25-214412.png" 
                 alt="Onze Taxi" 
+                width={1200}
+                height={900}
+                loading="lazy"
+                decoding="async"
                 className="rounded-3xl shadow-2xl"
               />
               <div className="absolute -bottom-6 -left-6 bg-emerald-600 text-white p-8 rounded-3xl shadow-xl">

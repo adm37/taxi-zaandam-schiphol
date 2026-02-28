@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
-import Autocomplete from "react-google-autocomplete";
 import { applySeoForPath } from '../lib/applySeoForPath';
 import { 
   MapPin, 
@@ -21,6 +20,12 @@ import {
   Car,
   Bus
 } from 'lucide-react';
+
+const LazyAutocomplete = lazy(
+  async () => ({
+    default: (await import('react-google-autocomplete')).default as React.ComponentType<any>,
+  }),
+);
 
 const googleMapsApiKey = (
   import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY ||
@@ -67,6 +72,7 @@ const FAQS = [
 
 export default function Home() {
   const [bookingStep, setBookingStep] = useState(1);
+  const [enableAutocomplete, setEnableAutocomplete] = useState(false);
   const [formData, setFormData] = useState({
     pickup: '',
     houseNumber: '',
@@ -282,8 +288,15 @@ export default function Home() {
             <div className="absolute inset-0 bg-gradient-to-r from-stone-50 via-stone-50/80 to-transparent z-10" />
             <div className="absolute inset-0 bg-gradient-to-t from-stone-50 via-stone-50/40 to-transparent lg:hidden z-10" />
             <img 
-              src="https://images.pexels.com/photos/1483146/pexels-photo-1483146.jpeg?_gl=1*h8wjj9*_ga*MTI5MjAxNTE0Ni4xNzY2NDg3MDY0*_ga_8JE65Q40S6*czE3NjcxNzk4ODEkbzMkZzEkdDE3NjcxNzk5MDckajM0JGwwJGgw" 
+              src="https://images.pexels.com/photos/1483146/pexels-photo-1483146.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=1600&h=1000"
+              srcSet="https://images.pexels.com/photos/1483146/pexels-photo-1483146.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=800&h=500 800w, https://images.pexels.com/photos/1483146/pexels-photo-1483146.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=1200&h=750 1200w, https://images.pexels.com/photos/1483146/pexels-photo-1483146.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=1600&h=1000 1600w"
+              sizes="(max-width: 1024px) 100vw, 75vw"
               alt="Taxi Background" 
+              width={1600}
+              height={1000}
+              loading="eager"
+              fetchPriority="high"
+              decoding="async"
               className="w-full h-full object-cover object-right"
             />
           </div>
@@ -345,28 +358,41 @@ export default function Home() {
                       <label className="block text-xs font-bold text-stone-400 uppercase mb-2">Ophaaladres (Straat)</label>
                       <div className="relative">
                         <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 z-10" size={18} />
-                        {hasGoogleMapsApiKey ? (
-                          <Autocomplete
-                            apiKey={googleMapsApiKey}
-                            onPlaceSelected={(place) => {
-                              setFormData({...formData, pickup: place.formatted_address || ''});
-                            }}
-                            options={{
-                              types: ["address"],
-                              componentRestrictions: { country: "nl" },
-                              bounds: {
-                                north: 52.55,
-                                south: 52.40,
-                                east: 4.90,
-                                west: 4.75,
-                              },
-                              strictBounds: true,
-                            }}
-                            className="w-full pl-10 pr-4 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"
-                            placeholder="Voer uw straat in..."
-                            defaultValue={formData.pickup}
-                            onChange={(e: any) => setFormData({...formData, pickup: e.target.value})}
-                          />
+                        {hasGoogleMapsApiKey && enableAutocomplete ? (
+                          <Suspense
+                            fallback={
+                              <input
+                                type="text"
+                                required
+                                className="w-full pl-10 pr-4 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"
+                                placeholder="Voer uw straat in..."
+                                value={formData.pickup}
+                                onChange={(e) => setFormData({...formData, pickup: e.target.value})}
+                              />
+                            }
+                          >
+                            <LazyAutocomplete
+                              apiKey={googleMapsApiKey}
+                              onPlaceSelected={(place: any) => {
+                                setFormData({...formData, pickup: place.formatted_address || ''});
+                              }}
+                              options={{
+                                types: ["address"],
+                                componentRestrictions: { country: "nl" },
+                                bounds: {
+                                  north: 52.55,
+                                  south: 52.40,
+                                  east: 4.90,
+                                  west: 4.75,
+                                },
+                                strictBounds: true,
+                              }}
+                              className="w-full pl-10 pr-4 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"
+                              placeholder="Voer uw straat in..."
+                              defaultValue={formData.pickup}
+                              onChange={(e: any) => setFormData({...formData, pickup: e.target.value})}
+                            />
+                          </Suspense>
                         ) : (
                           <input
                             type="text"
@@ -375,6 +401,11 @@ export default function Home() {
                             placeholder="Voer uw straat in..."
                             value={formData.pickup}
                             onChange={(e) => setFormData({...formData, pickup: e.target.value})}
+                            onFocus={() => {
+                              if (hasGoogleMapsApiKey) {
+                                setEnableAutocomplete(true);
+                              }
+                            }}
                           />
                         )}
                       </div>
