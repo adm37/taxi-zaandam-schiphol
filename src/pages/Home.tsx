@@ -38,6 +38,18 @@ const FAQS = [
     answer: "Bij ZaanTaxi Schiphol betaalt u een vast tarief van slechts €50 vanuit elke plek in Zaanstad (Zaandam, Krommenie, Assendelft, etc.) naar Schiphol Airport."
   },
   {
+    question: "Hoeveel kost een taxi naar Schiphol?",
+    answer: "De kosten van een taxi naar Schiphol verschillen per vertrekplaats. Vanuit Zaanstad reist u bij ons met een vaste prijs, zodat u vooraf precies weet wat u betaalt, ongeacht files of vertragingen onderweg."
+  },
+  {
+    question: "Wat is de goedkoopste manier om naar Schiphol te gaan?",
+    answer: "De goedkoopste manier hangt af van uw situatie. Reist u alleen met weinig bagage, dan kan het openbaar vervoer voordelig zijn. Reist u met meerdere personen of koffers, dan is een taxi vaak voordeliger én comfortabeler. Met onze vaste lage tarieven kiest u voor een betaalbare, directe rit zonder overstappen."
+  },
+  {
+    question: "Wat is goedkoper, Uber of taxi?",
+    answer: "Hoewel Uber soms goedkoper lijkt, kunnen prijzen sterk stijgen door dynamische tarieven. Wij hanteren vaste prijzen zonder onverwachte verhogingen. Daarnaast bent u bij ons verzekerd van beschikbaarheid op de afgesproken tijd, zonder last-minute annuleringen."
+  },
+  {
     question: "Hoe kan ik een taxi reserveren?",
     answer: "U kunt eenvoudig online reserveren via ons boekingsformulier op de website of direct bellen naar 075 - 234 00 37 voor een directe bevestiging."
   },

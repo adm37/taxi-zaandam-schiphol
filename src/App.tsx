@@ -9,6 +9,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import { Phone } from 'lucide-react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import SchipholFaq from './components/SchipholFaq';
 
 const Home = lazy(() => import('./pages/Home'));
 const Tarieven = lazy(() => import('./pages/Tarieven'));
@@ -174,6 +175,7 @@ function AnimatedRoutes() {
 function AppShell() {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith('/admin');
+  const isFaqExcludedRoute = ['/', '/contact', '/contact/', '/over-ons', '/over-ons/', '/tarieven', '/tarieven/'].includes(location.pathname);
 
   return (
     <div className="min-h-screen bg-stone-50 font-sans text-stone-900 flex flex-col">
@@ -181,6 +183,7 @@ function AppShell() {
       <main className="flex-grow">
         <AnimatedRoutes />
       </main>
+      {!isAdminRoute && !isFaqExcludedRoute && <SchipholFaq pathname={location.pathname} />}
       {!isAdminRoute && <Footer />}
 
       {!isAdminRoute && (
