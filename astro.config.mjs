@@ -6,6 +6,7 @@ import path from 'node:path';
 export default defineConfig({
   srcDir: './astro',
   output: 'static',
+  outDir: './dist',
   integrations: [react()],
   vite: {
     plugins: [tailwindcss()],
