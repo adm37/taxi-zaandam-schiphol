@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'motion/react';
 import { Phone } from 'lucide-react';
@@ -176,6 +176,10 @@ function AppShell() {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith('/admin');
   const isFaqExcludedRoute = ['/', '/contact', '/contact/', '/over-ons', '/over-ons/', '/tarieven', '/tarieven/'].includes(location.pathname);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, [location.pathname]);
 
   return (
     <div className="min-h-screen bg-stone-50 font-sans text-stone-900 flex flex-col">

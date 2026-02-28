@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import Autocomplete from "react-google-autocomplete";
+import { applySeoForPath } from '../lib/applySeoForPath';
 import { 
   MapPin, 
   Calendar, 
@@ -84,6 +85,10 @@ export default function Home() {
     price: 50,
     icon: Car
   });
+
+  useEffect(() => {
+    applySeoForPath('/');
+  }, []);
 
   useEffect(() => {
     // Logic for vehicle selection

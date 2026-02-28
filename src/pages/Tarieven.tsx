@@ -1,8 +1,13 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion } from 'motion/react';
 import { CheckCircle2, Star, CreditCard } from 'lucide-react';
+import { applySeoForPath } from '../lib/applySeoForPath';
 
 export default function Tarieven() {
+  useEffect(() => {
+    applySeoForPath('/tarieven');
+  }, []);
+
   return (
     <div className="pt-16">
       <section className="py-24 bg-white">

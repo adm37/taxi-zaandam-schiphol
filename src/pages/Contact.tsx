@@ -1,7 +1,12 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Phone, MapPin, Clock, MessageSquare } from 'lucide-react';
+import { applySeoForPath } from '../lib/applySeoForPath';
 
 export default function Contact() {
+  useEffect(() => {
+    applySeoForPath('/contact');
+  }, []);
+
   return (
     <div className="pt-16">
       <section className="py-24 bg-stone-50">
@@ -25,24 +30,14 @@ export default function Contact() {
 
             <div className="bg-white p-8 rounded-3xl border border-stone-200 shadow-sm text-center">
               <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center mx-auto mb-6">
-                <Phone size={24} />
-              </div>
-              <h4 className="font-bold text-lg mb-2">Direct Contact</h4>
-              <p className="text-stone-500 mb-4">Snel geholpen via telefoon of WhatsApp.</p>
-              <a href="tel:0752340037" className="text-emerald-600 font-bold">Bel nu</a>
-            </div>
-
-            <div className="bg-white p-8 rounded-3xl border border-stone-200 shadow-sm text-center">
-              <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center mx-auto mb-6">
                 <MessageSquare size={24} />
               </div>
               <h4 className="font-bold text-lg mb-2">WhatsApp</h4>
               <p className="text-stone-500 mb-4">Snel een berichtje sturen.</p>
               <a href="https://wa.me/31752340037" target="_blank" rel="noopener noreferrer" className="text-emerald-600 font-bold">Stuur een bericht</a>
             </div>
-          </div>
 
-          <div className="bg-stone-900 rounded-3xl border border-stone-200 shadow-sm overflow-hidden p-8 md:p-12 text-white flex flex-col justify-center">
+            <div className="bg-stone-900 rounded-3xl border border-stone-200 shadow-sm overflow-hidden p-8 text-white flex flex-col justify-center">
               <h3 className="text-2xl font-bold mb-8">Bedrijfsgegevens</h3>
               <ul className="space-y-6">
                 <li className="flex gap-4">
@@ -67,6 +62,7 @@ export default function Contact() {
                   </div>
                 </li>
               </ul>
+            </div>
           </div>
         </div>
       </section>
