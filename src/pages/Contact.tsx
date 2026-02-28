@@ -1,54 +1,7 @@
-import React, { useState } from 'react';
-import { motion } from 'motion/react';
-import { Phone, Mail, MapPin, Clock, MessageSquare } from 'lucide-react';
+import React from 'react';
+import { Phone, MapPin, Clock, MessageSquare } from 'lucide-react';
 
 export default function Contact() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitMessage, setSubmitMessage] = useState('');
-  const [submitError, setSubmitError] = useState(false);
-
-  const handleContactSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    const form = event.currentTarget;
-    const formData = new FormData(form);
-    const name = String(formData.get('name') || '').trim();
-    const email = String(formData.get('email') || '').trim();
-    const subject = String(formData.get('subject') || '').trim();
-    const message = String(formData.get('message') || '').trim();
-
-    setIsSubmitting(true);
-    setSubmitMessage('');
-    setSubmitError(false);
-
-    try {
-      const response = await fetch('/.netlify/functions/send-contact-email', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name,
-          email,
-          subject,
-          message,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Mail API request failed');
-      }
-
-      setSubmitMessage('Bedankt! Uw bericht is succesvol verzonden.');
-      form.reset();
-    } catch {
-      setSubmitError(true);
-      setSubmitMessage('Verzenden is mislukt. Probeer het opnieuw of bel 075 - 234 00 37.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
   return (
     <div className="pt-16">
       <section className="py-24 bg-stone-50">
@@ -72,11 +25,11 @@ export default function Contact() {
 
             <div className="bg-white p-8 rounded-3xl border border-stone-200 shadow-sm text-center">
               <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center mx-auto mb-6">
-                <Mail size={24} />
+                <Phone size={24} />
               </div>
-              <h4 className="font-bold text-lg mb-2">E-mail</h4>
-              <p className="text-stone-500 mb-4">Voor offertes en vragen.</p>
-              <a href="mailto:info@zaantaxischiphol.nl" className="text-emerald-600 font-bold">info@zaantaxischiphol.nl</a>
+              <h4 className="font-bold text-lg mb-2">Direct Contact</h4>
+              <p className="text-stone-500 mb-4">Snel geholpen via telefoon of WhatsApp.</p>
+              <a href="tel:0752340037" className="text-emerald-600 font-bold">Bel nu</a>
             </div>
 
             <div className="bg-white p-8 rounded-3xl border border-stone-200 shadow-sm text-center">
@@ -89,39 +42,7 @@ export default function Contact() {
             </div>
           </div>
 
-          <div className="bg-white rounded-3xl border border-stone-200 shadow-sm overflow-hidden grid lg:grid-cols-2">
-            <div className="p-8 md:p-12">
-              <h3 className="text-2xl font-bold mb-6">Stuur ons een bericht</h3>
-              <form className="space-y-4" onSubmit={handleContactSubmit}>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-stone-400 uppercase mb-2">Naam</label>
-                    <input name="name" type="text" required className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-stone-400 uppercase mb-2">E-mail</label>
-                    <input name="email" type="email" required className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none" />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-stone-400 uppercase mb-2">Onderwerp</label>
-                  <input name="subject" type="text" required className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none" />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-stone-400 uppercase mb-2">Bericht</label>
-                  <textarea name="message" rows={4} required className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none resize-none"></textarea>
-                </div>
-                <button type="submit" disabled={isSubmitting} className="w-full bg-emerald-600 text-white py-4 rounded-xl font-bold hover:bg-emerald-700 disabled:opacity-70 disabled:cursor-not-allowed transition-all">
-                  {isSubmitting ? 'Bezig met verzenden...' : 'Verstuur Bericht'}
-                </button>
-                {submitMessage && (
-                  <p className={`text-sm font-medium ${submitError ? 'text-red-600' : 'text-emerald-600'}`}>
-                    {submitMessage}
-                  </p>
-                )}
-              </form>
-            </div>
-            <div className="bg-stone-900 p-8 md:p-12 text-white flex flex-col justify-center">
+          <div className="bg-stone-900 rounded-3xl border border-stone-200 shadow-sm overflow-hidden p-8 md:p-12 text-white flex flex-col justify-center">
               <h3 className="text-2xl font-bold mb-8">Bedrijfsgegevens</h3>
               <ul className="space-y-6">
                 <li className="flex gap-4">
@@ -146,7 +67,6 @@ export default function Contact() {
                   </div>
                 </li>
               </ul>
-            </div>
           </div>
         </div>
       </section>

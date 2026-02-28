@@ -27,6 +27,7 @@ const googleMapsApiKey = (
   import.meta.env.GOOGLE_MAPS_API_KEY ||
   ''
 ).trim();
+const hasGoogleMapsApiKey = googleMapsApiKey.length > 0;
 
 const ZAANSTAD_LOCATIONS = [
   'Assendelft', 'Koog aan de Zaan', 'Krommenie', 'Westzaan', 'Wormer', 'Wormerveer', 'Zaandam', 'Zaandijk'
@@ -339,28 +340,44 @@ export default function Home() {
                       <label className="block text-xs font-bold text-stone-400 uppercase mb-2">Ophaaladres (Straat)</label>
                       <div className="relative">
                         <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 z-10" size={18} />
-                        <Autocomplete
-                          apiKey={googleMapsApiKey}
-                          onPlaceSelected={(place) => {
-                            setFormData({...formData, pickup: place.formatted_address || ''});
-                          }}
-                          options={{
-                            types: ["address"],
-                            componentRestrictions: { country: "nl" },
-                            bounds: {
-                              north: 52.55,
-                              south: 52.40,
-                              east: 4.90,
-                              west: 4.75,
-                            },
-                            strictBounds: true,
-                          }}
-                          className="w-full pl-10 pr-4 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"
-                          placeholder="Voer uw straat in..."
-                          defaultValue={formData.pickup}
-                          onChange={(e: any) => setFormData({...formData, pickup: e.target.value})}
-                        />
+                        {hasGoogleMapsApiKey ? (
+                          <Autocomplete
+                            apiKey={googleMapsApiKey}
+                            onPlaceSelected={(place) => {
+                              setFormData({...formData, pickup: place.formatted_address || ''});
+                            }}
+                            options={{
+                              types: ["address"],
+                              componentRestrictions: { country: "nl" },
+                              bounds: {
+                                north: 52.55,
+                                south: 52.40,
+                                east: 4.90,
+                                west: 4.75,
+                              },
+                              strictBounds: true,
+                            }}
+                            className="w-full pl-10 pr-4 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"
+                            placeholder="Voer uw straat in..."
+                            defaultValue={formData.pickup}
+                            onChange={(e: any) => setFormData({...formData, pickup: e.target.value})}
+                          />
+                        ) : (
+                          <input
+                            type="text"
+                            required
+                            className="w-full pl-10 pr-4 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"
+                            placeholder="Voer uw straat in..."
+                            value={formData.pickup}
+                            onChange={(e) => setFormData({...formData, pickup: e.target.value})}
+                          />
+                        )}
                       </div>
+                      {!hasGoogleMapsApiKey && (
+                        <p className="text-xs text-amber-600 mt-2">
+                          Adres-autocomplete is tijdelijk niet beschikbaar.
+                        </p>
+                      )}
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-stone-400 uppercase mb-2">Huisnr.</label>
