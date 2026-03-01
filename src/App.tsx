@@ -4,7 +4,7 @@
  */
 
 import React, { Suspense, lazy, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, StaticRouter, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'motion/react';
 import { Phone } from 'lucide-react';
 import Navbar from './components/Navbar';
@@ -204,10 +204,22 @@ function AppShell() {
   );
 }
 
-export default function App() {
+interface AppProps {
+  initialPath?: string;
+}
+
+export default function App({ initialPath = '/' }: AppProps) {
+  if (typeof window === 'undefined') {
+    return (
+      <StaticRouter location={initialPath}>
+        <AppShell />
+      </StaticRouter>
+    );
+  }
+
   return (
-    <Router>
+    <BrowserRouter>
       <AppShell />
-    </Router>
+    </BrowserRouter>
   );
 }
