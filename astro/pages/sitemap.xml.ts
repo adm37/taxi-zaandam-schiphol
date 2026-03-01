@@ -11,8 +11,8 @@ const airportSlugs = [
   'dusseldorf-airport',
 ];
 
-export const GET: APIRoute = ({ site }) => {
-  const baseUrl = (site?.toString() || 'https://www.zaantaxischiphol.nl').replace(/\/$/, '');
+export const GET: APIRoute = () => {
+  const baseUrl = 'https://www.zaantaxischiphol.nl';
   const locationSlugs = Object.keys(locationsData);
 
   const withTrailingSlash = (route: string): string => {

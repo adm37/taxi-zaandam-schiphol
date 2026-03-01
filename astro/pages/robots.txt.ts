@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 
-export const GET: APIRoute = ({ site }) => {
-  const baseUrl = (site?.toString() || 'https://www.zaantaxischiphol.nl').replace(/\/$/, '');
+export const GET: APIRoute = () => {
+  const baseUrl = 'https://www.zaantaxischiphol.nl';
   const content = [
     'User-agent: *',
     'Disallow: /admin/',

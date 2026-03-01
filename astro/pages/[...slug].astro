@@ -46,6 +46,6 @@ export function getStaticPaths() {
     <SeoHead {...seo} />
   </head>
   <body>
-    <App initialPath={slugPath} client:load />
+    <App initialPath={slugPath} client:idle />
   </body>
 </html>
