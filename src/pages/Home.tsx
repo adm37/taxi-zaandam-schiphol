@@ -248,7 +248,7 @@ export default function Home() {
   useEffect(() => {
     const schemaData = {
       "@context": "https://schema.org",
-      "@type": "TaxiService",
+      "@type": "LocalBusiness",
       "name": "ZaanTaxi Schiphol",
       "description": "Betrouwbare taxi service van Zaanstad naar Schiphol voor een vast tarief van €50.",
       "url": window.location.origin,

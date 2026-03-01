@@ -41,7 +41,7 @@ const defaultSeo: SeoMetadata = {
   ogImage: `${siteUrl}/og-image.jpg`,
   localBusinessJsonLd: {
     '@context': 'https://schema.org',
-    '@type': 'TaxiService',
+    '@type': 'LocalBusiness',
     name: 'ZaanTaxi Schiphol',
     url: `${siteUrl}/`,
     telephone: '+31752340037',
