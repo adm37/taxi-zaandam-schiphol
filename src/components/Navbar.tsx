@@ -5,14 +5,20 @@ import { Plane, Phone, Menu, X } from 'lucide-react';
 
 const NAV_LINKS = [
   { name: 'Home', href: '/' },
-  { name: 'Tarieven', href: '/tarieven' },
-  { name: 'Over Ons', href: '/over-ons' },
-  { name: 'Contact', href: '/contact' },
+  { name: 'Tarieven', href: '/tarieven/' },
+  { name: 'Over Ons', href: '/over-ons/' },
+  { name: 'Contact', href: '/contact/' },
 ];
+
+function normalizePath(pathname: string): string {
+  if (!pathname || pathname === '/') return '/';
+  return `/${pathname.replace(/^\/+|\/+$/g, '')}/`;
+}
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+  const currentPath = normalizePath(location.pathname);
 
   return (
     <nav className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-stone-200">
@@ -32,7 +38,7 @@ export default function Navbar() {
                 key={link.name} 
                 to={link.href} 
                 className={`text-sm font-medium transition-colors ${
-                  location.pathname === link.href ? 'text-emerald-600' : 'text-stone-600 hover:text-emerald-600'
+                  currentPath === normalizePath(link.href) ? 'text-emerald-600' : 'text-stone-600 hover:text-emerald-600'
                 }`}
               >
                 {link.name}
@@ -72,7 +78,7 @@ export default function Navbar() {
                   key={link.name} 
                   to={link.href} 
                   className={`block text-lg font-medium ${
-                    location.pathname === link.href ? 'text-emerald-600' : 'text-stone-600'
+                    currentPath === normalizePath(link.href) ? 'text-emerald-600' : 'text-stone-600'
                   }`}
                   onClick={() => setIsMenuOpen(false)}
                 >

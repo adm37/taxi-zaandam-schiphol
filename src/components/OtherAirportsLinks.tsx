@@ -24,7 +24,7 @@ export default function OtherAirportsLinks({ locationName, locationSlug, current
           {AIRPORTS.filter(a => a.slug !== currentAirportSlug).map((airport) => (
             <Link 
               key={airport.slug || 'schiphol'}
-              to={airport.slug ? `/taxi-${locationSlug}-${airport.slug}` : `/taxi-${locationSlug}-schiphol`}
+              to={airport.slug ? `/taxi-${locationSlug}-${airport.slug}/` : `/taxi-${locationSlug}-schiphol/`}
               className="flex items-center gap-3 bg-white p-4 rounded-xl border border-stone-100 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all group"
             >
               <div className="bg-emerald-50 p-2 rounded-lg group-hover:bg-emerald-100 transition-colors">

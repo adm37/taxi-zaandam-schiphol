@@ -28,9 +28,9 @@ export default function Footer() {
           <h4 className="text-white font-bold mb-6 uppercase tracking-widest text-xs">Snelkoppelingen</h4>
           <ul className="space-y-4 text-sm">
             <li><Link to="/" className="hover:text-emerald-500 transition-colors">Home</Link></li>
-            <li><Link to="/tarieven" className="hover:text-emerald-500 transition-colors">Tarieven</Link></li>
-            <li><Link to="/over-ons" className="hover:text-emerald-500 transition-colors">Over Ons</Link></li>
-            <li><Link to="/contact" className="hover:text-emerald-500 transition-colors">Contact</Link></li>
+            <li><Link to="/tarieven/" className="hover:text-emerald-500 transition-colors">Tarieven</Link></li>
+            <li><Link to="/over-ons/" className="hover:text-emerald-500 transition-colors">Over Ons</Link></li>
+            <li><Link to="/contact/" className="hover:text-emerald-500 transition-colors">Contact</Link></li>
           </ul>
         </div>
 
@@ -39,7 +39,7 @@ export default function Footer() {
           <ul className="grid grid-cols-1 gap-4 text-sm">
             {Object.values(locationsData).map((loc) => (
               <li key={loc.slug}>
-                <Link to={`/taxi-${loc.slug}-schiphol`} className="hover:text-emerald-500 transition-colors">
+                <Link to={`/taxi-${loc.slug}-schiphol/`} className="hover:text-emerald-500 transition-colors">
                   Taxi {loc.name} Schiphol
                 </Link>
               </li>

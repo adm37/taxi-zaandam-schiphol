@@ -701,7 +701,7 @@ export default function Home() {
               return (
                 <Link 
                   key={loc} 
-                  to={`/taxi-${slug}-schiphol`}
+                  to={`/taxi-${slug}-schiphol/`}
                   className="group p-6 rounded-2xl bg-stone-50 border border-stone-100 hover:bg-emerald-50 hover:border-emerald-200 transition-all"
                 >
                   <div className="flex items-center gap-3 mb-3">
