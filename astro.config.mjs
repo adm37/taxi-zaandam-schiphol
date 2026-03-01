@@ -7,6 +7,8 @@ export default defineConfig({
   srcDir: './astro',
   output: 'static',
   outDir: './dist',
+  site: process.env.PUBLIC_SITE_URL || 'https://www.zaantaxischiphol.nl',
+  trailingSlash: 'always',
   integrations: [react()],
   vite: {
     plugins: [tailwindcss()],

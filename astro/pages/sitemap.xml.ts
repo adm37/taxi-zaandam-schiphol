@@ -15,6 +15,11 @@ export const GET: APIRoute = ({ site }) => {
   const baseUrl = (site?.toString() || 'https://www.zaantaxischiphol.nl').replace(/\/$/, '');
   const locationSlugs = Object.keys(locationsData);
 
+  const withTrailingSlash = (route: string): string => {
+    if (route === '/') return '/';
+    return `${route.replace(/\/+$/, '')}/`;
+  };
+
   const routes = [
     '/',
     '/tarieven',
@@ -31,7 +36,7 @@ export const GET: APIRoute = ({ site }) => {
 
   const urlset = uniqueRoutes
     .map((route) => {
-      return `<url><loc>${baseUrl}${route}</loc><lastmod>${lastMod}</lastmod></url>`;
+      return `<url><loc>${baseUrl}${withTrailingSlash(route)}</loc><lastmod>${lastMod}</lastmod></url>`;
     })
     .join('');
 

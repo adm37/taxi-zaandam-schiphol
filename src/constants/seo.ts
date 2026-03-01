@@ -20,6 +20,15 @@ type SeoMetadataOverride = Partial<SeoMetadata> & Pick<SeoMetadata, 'title' | 'd
 
 const siteUrl = (import.meta.env.PUBLIC_SITE_URL || 'https://www.zaantaxischiphol.nl').replace(/\/$/, '');
 
+function absoluteUrl(pathname: string): string {
+  if (!pathname || pathname === '/') {
+    return `${siteUrl}/`;
+  }
+
+  const normalized = `/${pathname.replace(/^\/+|\/+$/g, '')}/`;
+  return `${siteUrl}${normalized}`;
+}
+
 const defaultSeo: SeoMetadata = {
   title: 'Taxi Zaandam Schiphol | Vaste Prijs Luchthavenvervoer',
   description: 'Betrouwbare taxi vanuit de Zaanstreek naar Schiphol en andere luchthavens. 24/7 service met vaste tarieven.',
@@ -85,7 +94,7 @@ const routeSeoOverrides: Record<string, SeoMetadataOverride> = {
     keywords: 'taxi tarieven schiphol, taxi prijzen zaandam, luchthaven taxi kosten',
     breadcrumbJsonLd: createBreadcrumbJsonLd([
       { name: 'Home', url: `${siteUrl}/` },
-      { name: 'Tarieven', url: `${siteUrl}/tarieven` },
+      { name: 'Tarieven', url: `${siteUrl}/tarieven/` },
     ]),
   },
   '/over-ons': {
@@ -94,7 +103,7 @@ const routeSeoOverrides: Record<string, SeoMetadataOverride> = {
     keywords: 'over taxi zaandam schiphol, taxibedrijf zaanstreek',
     breadcrumbJsonLd: createBreadcrumbJsonLd([
       { name: 'Home', url: `${siteUrl}/` },
-      { name: 'Over Ons', url: `${siteUrl}/over-ons` },
+      { name: 'Over Ons', url: `${siteUrl}/over-ons/` },
     ]),
   },
   '/contact': {
@@ -103,7 +112,7 @@ const routeSeoOverrides: Record<string, SeoMetadataOverride> = {
     keywords: 'contact taxi zaandam schiphol, taxi reserveren zaanstreek',
     breadcrumbJsonLd: createBreadcrumbJsonLd([
       { name: 'Home', url: `${siteUrl}/` },
-      { name: 'Contact', url: `${siteUrl}/contact` },
+      { name: 'Contact', url: `${siteUrl}/contact/` },
     ]),
   },
 };
@@ -116,7 +125,7 @@ Object.values(locationsData).forEach((location) => {
     keywords: `taxi ${location.name.toLowerCase()} schiphol, taxi ${location.name.toLowerCase()}, luchthavenvervoer ${location.name.toLowerCase()}`,
     breadcrumbJsonLd: createBreadcrumbJsonLd([
       { name: 'Home', url: `${siteUrl}/` },
-      { name: `Taxi ${location.name} Schiphol`, url: `${siteUrl}${route}` },
+      { name: `Taxi ${location.name} Schiphol`, url: absoluteUrl(route) },
     ]),
   };
 });
@@ -140,8 +149,8 @@ Object.values(locationsData).forEach((location) => {
       keywords: `taxi ${location.name.toLowerCase()} ${airport.label.toLowerCase()}, ${airport.keywords}, luchthavenvervoer ${location.name.toLowerCase()}`,
       breadcrumbJsonLd: createBreadcrumbJsonLd([
         { name: 'Home', url: `${siteUrl}/` },
-        { name: `Taxi ${location.name} Schiphol`, url: `${siteUrl}/taxi-${location.slug}-schiphol` },
-        { name: `Taxi ${location.name} ${airport.label}`, url: `${siteUrl}${route}` },
+        { name: `Taxi ${location.name} Schiphol`, url: absoluteUrl(`/taxi-${location.slug}-schiphol`) },
+        { name: `Taxi ${location.name} ${airport.label}`, url: absoluteUrl(route) },
       ]),
     };
   });
@@ -155,7 +164,7 @@ function normalizePath(pathname: string): string {
 export function getSeoForPath(pathname: string): SeoMetadata {
   const normalizedPath = normalizePath(pathname);
   const override = routeSeoOverrides[normalizedPath];
-  const pageUrl = normalizedPath === '/' ? `${siteUrl}/` : `${siteUrl}${normalizedPath}`;
+  const pageUrl = absoluteUrl(normalizedPath);
 
   const title = override?.title ?? defaultSeo.title;
   const description = override?.description ?? defaultSeo.description;
