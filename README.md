@@ -39,6 +39,46 @@ Zet in Netlify bij **Site configuration → Environment variables**:
 - `CONTACT_FORM_TO_EMAIL` = `ademsade@gmail.com`
 - `CONTACT_FORM_FROM_EMAIL` = geverifieerd afzenderadres in Resend (of laat fallback op `onboarding@resend.dev` voor testen)
 
+## Boekingen opslaan in Hostinger database
+
+Het admin-gedeelte en nieuwe boekingen gebruiken `/api/bookings.php` en slaan data op in je Hostinger MySQL database.
+
+Stappen:
+
+1. Open [public/api/config.php](public/api/config.php)
+2. Vul je databasegegevens in:
+   - `'db_host'` (op Hostinger vaak `localhost` als DB op hetzelfde hostingaccount staat)
+   - `'db_port'` (meestal `3306`)
+   - `'db_name'`
+   - `'db_user'`
+   - `'db_password'`
+   - `'db_table'` (bijv. `bookings`)
+3. Upload/deploy je site inclusief de map `api` in de webroot.
+
+De tabel wordt automatisch aangemaakt bij de eerste request. Als je liever handmatig maakt:
+
+```sql
+CREATE TABLE IF NOT EXISTS bookings (
+   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+   name VARCHAR(120) NOT NULL,
+   phone VARCHAR(50) NOT NULL,
+   pickup VARCHAR(255) NOT NULL,
+   destination VARCHAR(255) NOT NULL,
+   date VARCHAR(30) NOT NULL,
+   time VARCHAR(30) NOT NULL,
+   passengers INT NOT NULL DEFAULT 1,
+   suitcases INT NOT NULL DEFAULT 0,
+   vehicle_type VARCHAR(80) NOT NULL,
+   payment_method VARCHAR(80) NOT NULL,
+   total_price DECIMAL(10,2) NOT NULL DEFAULT 0,
+   PRIMARY KEY (id),
+   KEY idx_created_at (created_at)
+);
+```
+
+Zonder correcte waarden in [public/api/config.php](public/api/config.php) retourneert de endpoint een fout en worden boekingen niet opgeslagen.
+
 ## Build
 
 Use:

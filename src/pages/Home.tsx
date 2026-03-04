@@ -140,34 +140,6 @@ export default function Home() {
     }
   }, [formData.passengers, formData.suitcases, formData.destination]);
 
-  const saveBookingToLocalStorage = (booking: {
-    name: string;
-    phone: string;
-    pickup: string;
-    destination: string;
-    date: string;
-    time: string;
-    passengers: number;
-    suitcases: number;
-    vehicleType: string;
-    paymentMethod: string;
-    totalPrice: number;
-  }) => {
-    try {
-      const existingRaw = localStorage.getItem('local-bookings') || '[]';
-      const existing = JSON.parse(existingRaw);
-      const list = Array.isArray(existing) ? existing : [];
-
-      list.unshift({
-        id: `local-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
-        createdAt: new Date().toISOString(),
-        ...booking,
-      });
-
-      localStorage.setItem('local-bookings', JSON.stringify(list.slice(0, 500)));
-    } catch {}
-  };
-
   const handleBookingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -195,17 +167,22 @@ export default function Home() {
       totalPrice,
     };
 
-    saveBookingToLocalStorage(bookingPayload);
-
     try {
-      await fetch('/.netlify/functions/bookings', {
+      const saveResponse = await fetch('/api/bookings.php', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(bookingPayload),
       });
-    } catch {}
+
+      if (!saveResponse.ok) {
+        throw new Error('booking-save-failed');
+      }
+    } catch {
+      alert('Boeking kon niet worden opgeslagen. Probeer het opnieuw.');
+      return;
+    }
 
     const message = `*Schiphol Taxi Reservering*%0A%0A` +
       `*Naam:* ${formData.name}%0A` +

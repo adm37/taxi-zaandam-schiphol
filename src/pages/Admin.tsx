@@ -30,22 +30,12 @@ export default function Admin() {
 
   const isLoggedIn = useMemo(() => token.length > 0, [token]);
 
-  const readLocalBookings = (): Booking[] => {
-    try {
-      const raw = localStorage.getItem('local-bookings') || '[]';
-      const parsed = JSON.parse(raw);
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return [];
-    }
-  };
-
   const loadBookings = async (activeToken: string) => {
     setIsLoading(true);
     setErrorMessage('');
 
     try {
-      const response = await fetch('/.netlify/functions/bookings', {
+      const response = await fetch('/api/bookings.php', {
         method: 'GET',
         headers: {
           Authorization: `Basic ${activeToken}`,
@@ -57,7 +47,7 @@ export default function Admin() {
           throw new Error('unauthorized');
         }
 
-        throw new Error('endpoint-unavailable');
+        throw new Error('endpoint-error');
       }
 
       const data = (await response.json()) as { bookings?: Booking[] };
@@ -65,11 +55,11 @@ export default function Admin() {
     } catch (error) {
       if (error instanceof Error && error.message === 'unauthorized') {
         setErrorMessage('Inloggen mislukt of ritten konden niet geladen worden.');
-        setBookings([]);
       } else {
-        setBookings(readLocalBookings());
-        setErrorMessage('');
+        setErrorMessage('Ritten konden niet geladen worden uit de database.');
       }
+
+      setBookings([]);
     } finally {
       setIsLoading(false);
     }
