@@ -26,6 +26,7 @@ export default function Admin() {
   const [token, setToken] = useState('');
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [deletingBookingId, setDeletingBookingId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
 
   const isLoggedIn = useMemo(() => token.length > 0, [token]);
@@ -97,6 +98,49 @@ export default function Admin() {
     setPassword('');
     setErrorMessage('');
     sessionStorage.removeItem(SESSION_KEY);
+  };
+
+  const handleDeleteBooking = async (bookingId: string) => {
+    if (!token) {
+      return;
+    }
+
+    const confirmed = window.confirm('Weet je zeker dat je deze boeking wilt verwijderen?');
+    if (!confirmed) {
+      return;
+    }
+
+    setDeletingBookingId(bookingId);
+    setErrorMessage('');
+
+    try {
+      const response = await fetch('/api/bookings.php', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Basic ${token}`,
+        },
+        body: JSON.stringify({ id: bookingId }),
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error('unauthorized');
+        }
+
+        throw new Error('delete-failed');
+      }
+
+      setBookings((previous) => previous.filter((booking) => booking.id !== bookingId));
+    } catch (error) {
+      if (error instanceof Error && error.message === 'unauthorized') {
+        setErrorMessage('Sessie verlopen. Log opnieuw in om boekingen te verwijderen.');
+      } else {
+        setErrorMessage('Boeking kon niet verwijderd worden. Probeer het opnieuw.');
+      }
+    } finally {
+      setDeletingBookingId(null);
+    }
   };
 
   if (!isLoggedIn) {
@@ -172,7 +216,7 @@ export default function Admin() {
 
         <div className="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left min-w-[1100px]">
+            <table className="w-full text-left min-w-[1250px]">
               <thead className="bg-stone-50 text-stone-600 text-xs uppercase tracking-wide">
                 <tr>
                   <th className="px-4 py-3">Binnengekomen</th>
@@ -187,18 +231,19 @@ export default function Admin() {
                   <th className="px-4 py-3">Voertuig</th>
                   <th className="px-4 py-3">Betaling</th>
                   <th className="px-4 py-3">Prijs</th>
+                  <th className="px-4 py-3">Actie</th>
                 </tr>
               </thead>
               <tbody>
                 {isLoading ? (
                   <tr>
-                    <td colSpan={12} className="px-4 py-8 text-center text-stone-500">
+                    <td colSpan={13} className="px-4 py-8 text-center text-stone-500">
                       Laden...
                     </td>
                   </tr>
                 ) : bookings.length === 0 ? (
                   <tr>
-                    <td colSpan={12} className="px-4 py-8 text-center text-stone-500">
+                    <td colSpan={13} className="px-4 py-8 text-center text-stone-500">
                       Nog geen ritten gevonden.
                     </td>
                   </tr>
@@ -217,6 +262,16 @@ export default function Admin() {
                       <td className="px-4 py-3 whitespace-nowrap">{booking.vehicleType}</td>
                       <td className="px-4 py-3 whitespace-nowrap">{booking.paymentMethod}</td>
                       <td className="px-4 py-3 whitespace-nowrap">€{booking.totalPrice}</td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteBooking(booking.id)}
+                          disabled={deletingBookingId === booking.id}
+                          className="px-3 py-1.5 rounded-lg border border-red-300 text-red-700 hover:bg-red-50 disabled:opacity-50"
+                        >
+                          {deletingBookingId === booking.id ? 'Verwijderen...' : 'Verwijderen'}
+                        </button>
+                      </td>
                     </tr>
                   ))
                 )}

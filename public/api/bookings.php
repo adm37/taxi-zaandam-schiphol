@@ -247,4 +247,37 @@ if ($method === 'POST') {
     }
 }
 
+if ($method === 'DELETE') {
+    if (!isAuthorized($config)) {
+        header('WWW-Authenticate: Basic realm="Admin dashboard"');
+        jsonResponse(401, ['error' => 'Unauthorized']);
+    }
+
+    $body = file_get_contents('php://input');
+    $payload = json_decode((string)$body, true);
+
+    $bookingIdRaw = $payload['id'] ?? ($_GET['id'] ?? null);
+    if (!is_numeric($bookingIdRaw)) {
+        jsonResponse(400, ['error' => 'Missing or invalid booking id']);
+    }
+
+    $bookingId = (int)$bookingIdRaw;
+    if ($bookingId <= 0) {
+        jsonResponse(400, ['error' => 'Missing or invalid booking id']);
+    }
+
+    try {
+        $stmt = $pdo->prepare("DELETE FROM {$tableName} WHERE id = ? LIMIT 1");
+        $stmt->execute([$bookingId]);
+
+        if ($stmt->rowCount() === 0) {
+            jsonResponse(404, ['error' => 'Booking not found']);
+        }
+
+        jsonResponse(200, ['ok' => true, 'deletedId' => $bookingId]);
+    } catch (Throwable $error) {
+        jsonResponse(500, ['error' => 'Could not delete booking']);
+    }
+}
+
 jsonResponse(405, ['error' => 'Method not allowed']);
