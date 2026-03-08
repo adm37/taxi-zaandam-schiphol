@@ -80,11 +80,35 @@ function ensureTableExists(PDO $pdo, string $tableName): void
       vehicle_type VARCHAR(80) NOT NULL,
       payment_method VARCHAR(80) NOT NULL,
       total_price DECIMAL(10,2) NOT NULL DEFAULT 0,
+      return_pickup VARCHAR(255) NULL,
+      return_destination VARCHAR(255) NULL,
+      return_date VARCHAR(30) NULL,
+      return_time VARCHAR(30) NULL,
       PRIMARY KEY (id),
       KEY idx_created_at (created_at)
     )";
 
     $pdo->exec($sql);
+
+    $requiredColumns = [
+        'return_pickup' => "ALTER TABLE {$tableName} ADD COLUMN return_pickup VARCHAR(255) NULL AFTER total_price",
+        'return_destination' => "ALTER TABLE {$tableName} ADD COLUMN return_destination VARCHAR(255) NULL AFTER return_pickup",
+        'return_date' => "ALTER TABLE {$tableName} ADD COLUMN return_date VARCHAR(30) NULL AFTER return_destination",
+        'return_time' => "ALTER TABLE {$tableName} ADD COLUMN return_time VARCHAR(30) NULL AFTER return_date",
+    ];
+
+    $columnCheckStmt = $pdo->prepare(
+        'SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = ? AND column_name = ?'
+    );
+
+    foreach ($requiredColumns as $columnName => $alterSql) {
+        $columnCheckStmt->execute([$tableName, $columnName]);
+        $hasColumn = (int)$columnCheckStmt->fetchColumn() > 0;
+
+        if (!$hasColumn) {
+            $pdo->exec($alterSql);
+        }
+    }
 }
 
 function getAuthorizationHeader(): string
@@ -168,7 +192,11 @@ if ($method === 'GET') {
             suitcases,
             vehicle_type AS vehicleType,
             payment_method AS paymentMethod,
-            total_price AS totalPrice
+                        total_price AS totalPrice,
+                        return_pickup AS returnPickup,
+                        return_destination AS returnDestination,
+                        return_date AS returnDate,
+                        return_time AS returnTime
           FROM {$tableName}
           ORDER BY created_at DESC
           LIMIT 2000");
@@ -207,6 +235,10 @@ if ($method === 'POST') {
         'vehicleType' => trim((string)($payload['vehicleType'] ?? '')),
         'paymentMethod' => trim((string)($payload['paymentMethod'] ?? '')),
         'totalPrice' => is_numeric($payload['totalPrice'] ?? null) ? (float)$payload['totalPrice'] : 0,
+        'returnPickup' => trim((string)($payload['returnPickup'] ?? '')),
+        'returnDestination' => trim((string)($payload['returnDestination'] ?? '')),
+        'returnDate' => trim((string)($payload['returnDate'] ?? '')),
+        'returnTime' => trim((string)($payload['returnTime'] ?? '')),
     ];
 
     try {
@@ -222,9 +254,13 @@ if ($method === 'POST') {
             suitcases,
             vehicle_type,
             payment_method,
-            total_price
+                        total_price,
+                        return_pickup,
+                        return_destination,
+                        return_date,
+                        return_time
           )
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         $stmt = $pdo->prepare($sql);
         $stmt->execute([
@@ -239,6 +275,10 @@ if ($method === 'POST') {
             $booking['vehicleType'],
             $booking['paymentMethod'],
             $booking['totalPrice'],
+            $booking['returnPickup'] !== '' ? $booking['returnPickup'] : null,
+            $booking['returnDestination'] !== '' ? $booking['returnDestination'] : null,
+            $booking['returnDate'] !== '' ? $booking['returnDate'] : null,
+            $booking['returnTime'] !== '' ? $booking['returnTime'] : null,
         ]);
 
         jsonResponse(200, ['ok' => true, 'bookingId' => (int)$pdo->lastInsertId()]);

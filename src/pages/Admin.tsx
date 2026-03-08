@@ -14,6 +14,10 @@ type Booking = {
   vehicleType: string;
   paymentMethod: string;
   totalPrice: number;
+  returnPickup?: string;
+  returnDestination?: string;
+  returnDate?: string;
+  returnTime?: string;
 };
 
 const ADMIN_USERNAME = 'admin';
@@ -324,36 +328,29 @@ export default function Admin() {
         {errorMessage && <p className="text-sm text-red-600 mb-4">{errorMessage}</p>}
 
         <div className="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left min-w-[1250px]">
+          <div>
+            <table className="w-full text-left table-fixed">
               <thead className="bg-stone-50 text-stone-600 text-xs uppercase tracking-wide">
                 <tr>
-                  <th className="px-4 py-3">Binnengekomen</th>
-                  <th className="px-4 py-3">Rittype</th>
-                  <th className="px-4 py-3">Naam</th>
-                  <th className="px-4 py-3">Telefoon</th>
-                  <th className="px-4 py-3">Ophaaladres</th>
-                  <th className="px-4 py-3">Bestemming</th>
-                  <th className="px-4 py-3">Datum</th>
-                  <th className="px-4 py-3">Tijd</th>
-                  <th className="px-4 py-3">Passagiers</th>
-                  <th className="px-4 py-3">Koffers</th>
-                  <th className="px-4 py-3">Voertuig</th>
-                  <th className="px-4 py-3">Betaling</th>
-                  <th className="px-4 py-3">Prijs</th>
-                  <th className="px-4 py-3">Actie</th>
+                  <th className="px-3 py-3 w-[13%]">Binnengekomen</th>
+                  <th className="px-3 py-3 w-[16%]">Klant</th>
+                  <th className="px-3 py-3 w-[13%]">Rittype</th>
+                  <th className="px-3 py-3 w-[25%]">Rit</th>
+                  <th className="px-3 py-3 w-[18%]">Details</th>
+                  <th className="px-3 py-3 w-[8%]">Prijs</th>
+                  <th className="px-3 py-3 w-[7%]">Actie</th>
                 </tr>
               </thead>
               <tbody>
                 {isLoading ? (
                   <tr>
-                    <td colSpan={14} className="px-4 py-8 text-center text-stone-500">
+                    <td colSpan={7} className="px-4 py-8 text-center text-stone-500">
                       Laden...
                     </td>
                   </tr>
                 ) : sortedBookings.length === 0 ? (
                   <tr>
-                    <td colSpan={14} className="px-4 py-8 text-center text-stone-500">
+                    <td colSpan={7} className="px-4 py-8 text-center text-stone-500">
                       Nog geen ritten gevonden.
                     </td>
                   </tr>
@@ -362,33 +359,41 @@ export default function Admin() {
                     const nightRideLabel = buildNightRideLabel(booking.date, booking.time);
 
                     return (
-                    <tr key={booking.id} className="border-t border-stone-100 text-sm text-stone-700">
-                      <td className="px-4 py-3 whitespace-nowrap">{new Date(booking.createdAt).toLocaleString('nl-NL')}</td>
-                      <td className="px-4 py-3 whitespace-nowrap">{getTripTypeLabel(booking.paymentMethod)}</td>
-                      <td className="px-4 py-3 whitespace-nowrap">{booking.name}</td>
-                      <td className="px-4 py-3 whitespace-nowrap">{booking.phone}</td>
-                      <td className="px-4 py-3">{booking.pickup}</td>
-                      <td className="px-4 py-3 whitespace-nowrap">{booking.destination}</td>
-                      <td className="px-4 py-3 whitespace-nowrap">{booking.date}</td>
-                      <td className="px-4 py-3 whitespace-nowrap">
-                        <div>{booking.time}</div>
+                    <tr key={booking.id} className="border-t border-stone-100 text-sm text-stone-700 align-top">
+                      <td className="px-3 py-3 break-words">{new Date(booking.createdAt).toLocaleString('nl-NL')}</td>
+                      <td className="px-3 py-3 break-words">
+                        <div className="font-semibold text-stone-900">{booking.name}</div>
+                        <div className="text-xs text-stone-500 mt-1">{booking.phone}</div>
+                      </td>
+                      <td className="px-3 py-3 break-words">{getTripTypeLabel(booking.paymentMethod)}</td>
+                      <td className="px-3 py-3 break-words">
+                        <div className="font-medium text-stone-800">{booking.pickup}</div>
+                        <div className="text-xs text-stone-500 mt-1">→ {booking.destination}</div>
+                        <div className="text-xs text-stone-500 mt-1">{booking.date} om {booking.time}</div>
+                        {booking.returnDate && booking.returnTime && (
+                          <div className="text-xs text-emerald-700 mt-2">
+                            Retour: {booking.returnPickup || '-'} → {booking.returnDestination || '-'} ({booking.returnDate} om {booking.returnTime})
+                          </div>
+                        )}
                         {nightRideLabel && (
                           <div className="text-xs text-stone-500 mt-1">
                             {nightRideLabel}
                           </div>
                         )}
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap">{booking.passengers}</td>
-                      <td className="px-4 py-3 whitespace-nowrap">{booking.suitcases}</td>
-                      <td className="px-4 py-3 whitespace-nowrap">{booking.vehicleType}</td>
-                      <td className="px-4 py-3 whitespace-nowrap">{booking.paymentMethod}</td>
-                      <td className="px-4 py-3 whitespace-nowrap">€{booking.totalPrice}</td>
-                      <td className="px-4 py-3 whitespace-nowrap">
+                      <td className="px-3 py-3 break-words">
+                        <div className="text-xs text-stone-600">Passagiers: {booking.passengers}</div>
+                        <div className="text-xs text-stone-600">Koffers: {booking.suitcases}</div>
+                        <div className="text-xs text-stone-600 mt-1">Voertuig: {booking.vehicleType}</div>
+                        <div className="text-xs text-stone-600 mt-1">Betaling: {booking.paymentMethod}</div>
+                      </td>
+                      <td className="px-3 py-3 font-semibold text-stone-900">€{booking.totalPrice}</td>
+                      <td className="px-3 py-3">
                         <button
                           type="button"
                           onClick={() => handleDeleteBooking(booking.id)}
                           disabled={deletingBookingId === booking.id}
-                          className="px-3 py-1.5 rounded-lg border border-red-300 text-red-700 hover:bg-red-50 disabled:opacity-50"
+                          className="px-2 py-1.5 rounded-lg border border-red-300 text-red-700 hover:bg-red-50 disabled:opacity-50 text-xs"
                         >
                           {deletingBookingId === booking.id ? 'Verwijderen...' : 'Verwijderen'}
                         </button>

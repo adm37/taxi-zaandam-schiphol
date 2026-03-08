@@ -98,6 +98,8 @@ export default function Home() {
     date: '',
     time: '',
     returnTrip: false,
+    returnPickup: '',
+    returnDestination: '',
     returnDate: '',
     returnTime: '',
     passengers: 1,
@@ -190,6 +192,10 @@ export default function Home() {
       vehicleType: vehicleInfo.type,
       paymentMethod: `${paymentMethodLabel}${formData.returnTrip ? ' | Retour op metertarief' : ''}`,
       totalPrice,
+      returnPickup: formData.returnTrip ? formData.returnPickup : '',
+      returnDestination: formData.returnTrip ? formData.returnDestination : '',
+      returnDate: formData.returnTrip ? formData.returnDate : '',
+      returnTime: formData.returnTrip ? formData.returnTime : '',
     };
 
     const message = `*Schiphol Taxi Reservering*%0A%0A` +
@@ -200,7 +206,7 @@ export default function Home() {
       `*Bestemming:* ${formData.destination}%0A` +
       `*Datum:* ${formData.date}%0A` +
       `*Tijd:* ${formData.time}%0A` +
-      `${formData.returnTrip ? `*Retourdatum:* ${formData.returnDate}%0A*Retourtijd:* ${formData.returnTime}%0A*Retourtarief (${vehicleInfo.type}):* start €${formatEuro(returnTariff.start)} + €${formatEuro(returnTariff.perKm)}/km + €${formatEuro(returnTariff.perMinute)}/min%0A` : ''}` +
+      `${formData.returnTrip ? `*Retour ophaaladres:* ${formData.returnPickup}%0A*Retour bestemming:* ${formData.returnDestination}%0A*Retourdatum:* ${formData.returnDate}%0A*Retourtijd:* ${formData.returnTime}%0A*Retourtarief (${vehicleInfo.type}):* start €${formatEuro(returnTariff.start)} + €${formatEuro(returnTariff.perKm)}/km + €${formatEuro(returnTariff.perMinute)}/min%0A` : ''}` +
       `*Passagiers:* ${formData.passengers}%0A` +
       `*Koffers:* ${formData.suitcases}%0A` +
       `*Voertuig:* ${vehicleInfo.type}%0A` +
@@ -252,6 +258,8 @@ export default function Home() {
       date: '',
       time: '',
       returnTrip: false,
+      returnPickup: '',
+      returnDestination: '',
       returnDate: '',
       returnTime: '',
       passengers: 1,
@@ -509,27 +517,70 @@ export default function Home() {
                   </div>
 
                   <div className="p-4 bg-stone-50 border border-stone-200 rounded-2xl space-y-3">
-                    <div className="flex items-center justify-between gap-3">
+                    <div className="flex flex-col gap-3">
                       <div>
                         <p className="text-sm font-bold text-stone-900">Terugreis toevoegen</p>
                         <p className="text-xs text-stone-500">Heenreis blijft vast tarief, terugreis is op meter.</p>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => setFormData((prev) => ({
-                          ...prev,
-                          returnTrip: !prev.returnTrip,
-                          returnDate: !prev.returnTrip ? prev.returnDate : '',
-                          returnTime: !prev.returnTrip ? prev.returnTime : '',
-                        }))}
-                        className={`px-4 py-2 rounded-xl border font-bold transition-all ${formData.returnTrip ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-stone-700 border-stone-300 hover:bg-stone-100'}`}
-                      >
-                        {formData.returnTrip ? 'Ja, terugreis' : 'Nee, enkele reis'}
-                      </button>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setFormData((prev) => ({
+                            ...prev,
+                            returnTrip: true,
+                            returnPickup: prev.returnPickup || prev.destination,
+                            returnDestination: prev.returnDestination || `${prev.pickup} ${prev.houseNumber}`.trim(),
+                          }))}
+                          className={`px-4 py-2 rounded-xl border font-bold transition-all ${formData.returnTrip ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-stone-700 border-stone-300 hover:bg-stone-100'}`}
+                        >
+                          Ja, terugreis
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setFormData((prev) => ({
+                            ...prev,
+                            returnTrip: false,
+                            returnPickup: '',
+                            returnDestination: '',
+                            returnDate: '',
+                            returnTime: '',
+                          }))}
+                          className={`px-4 py-2 rounded-xl border font-bold transition-all ${!formData.returnTrip ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-stone-700 border-stone-300 hover:bg-stone-100'}`}
+                        >
+                          Nee, enkele reis
+                        </button>
+                      </div>
                     </div>
 
                     {formData.returnTrip && (
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-xs font-bold text-stone-400 uppercase mb-2">Retour ophaaladres</label>
+                            <input
+                              type="text"
+                              required={formData.returnTrip}
+                              className="w-full px-4 py-3 bg-white border border-stone-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"
+                              value={formData.returnPickup}
+                              onChange={(e) => setFormData({...formData, returnPickup: e.target.value})}
+                              placeholder="Bijv. Schiphol Airport"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-stone-400 uppercase mb-2">Retour bestemming</label>
+                            <input
+                              type="text"
+                              required={formData.returnTrip}
+                              className="w-full px-4 py-3 bg-white border border-stone-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"
+                              value={formData.returnDestination}
+                              onChange={(e) => setFormData({...formData, returnDestination: e.target.value})}
+                              placeholder="Bijv. Uw adres"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
                         <div>
                           <label className="block text-xs font-bold text-stone-400 uppercase mb-2">Retourdatum</label>
                           <input
@@ -551,6 +602,7 @@ export default function Home() {
                             onChange={(e) => setFormData({...formData, returnTime: e.target.value})}
                           />
                         </div>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -559,7 +611,7 @@ export default function Home() {
                     <button type="button" onClick={() => setBookingStep(1)} className="flex-1 bg-stone-100 text-stone-600 py-4 rounded-xl font-bold hover:bg-stone-200 transition-all">Terug</button>
                     <button 
                       type="button"
-                      disabled={!formData.date || !formData.time || (formData.returnTrip && (!formData.returnDate || !formData.returnTime))}
+                      disabled={!formData.date || !formData.time || (formData.returnTrip && (!formData.returnPickup || !formData.returnDestination || !formData.returnDate || !formData.returnTime))}
                       onClick={() => setBookingStep(3)}
                       className="flex-[2] bg-emerald-600 text-white py-4 rounded-xl font-bold hover:bg-emerald-700 disabled:opacity-50 transition-all flex items-center justify-center gap-2 group"
                     >
