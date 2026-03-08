@@ -874,8 +874,6 @@ export default function Home() {
             </form>
             
             <p className="mt-6 text-center text-stone-400 text-sm">
-              Liever telefonisch reserveren? <a href="tel:0752340037" className="text-emerald-600 font-bold hover:underline">075 - 234 00 37</a>
-              <br />
               <span className="text-[10px] mt-1 block">* Bij pinnen of creditcard komt er een toeslag van €5 bij.</span>
             </p>
           </motion.div>
