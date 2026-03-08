@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { Trash2 } from 'lucide-react';
 
 type Booking = {
   id: string;
@@ -393,9 +394,15 @@ export default function Admin() {
                           type="button"
                           onClick={() => handleDeleteBooking(booking.id)}
                           disabled={deletingBookingId === booking.id}
-                          className="px-2 py-1.5 rounded-lg border border-red-300 text-red-700 hover:bg-red-50 disabled:opacity-50 text-xs"
+                          className="w-8 h-8 rounded-lg border border-red-300 text-red-700 hover:bg-red-50 disabled:opacity-50 inline-flex items-center justify-center"
+                          aria-label="Verwijder boeking"
+                          title="Verwijder boeking"
                         >
-                          {deletingBookingId === booking.id ? 'Verwijderen...' : 'Verwijderen'}
+                          {deletingBookingId === booking.id ? (
+                            <span className="text-[10px]">...</span>
+                          ) : (
+                            <Trash2 size={14} />
+                          )}
                         </button>
                       </td>
                     </tr>

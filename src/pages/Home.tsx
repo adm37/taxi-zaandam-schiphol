@@ -114,6 +114,14 @@ export default function Home() {
     price: 50,
     icon: Car
   });
+  const [returnEstimate, setReturnEstimate] = useState({
+    price: 0,
+    distanceKm: 0,
+    durationMin: 0,
+    isLoading: false,
+    error: '',
+  });
+  const activeReturnTariff = vehicleInfo.type === 'Sedan' ? METER_TARIFF_2026.Sedan : METER_TARIFF_2026.Taxibus;
 
   useEffect(() => {
     applySeoForPath('/');
@@ -163,6 +171,92 @@ export default function Home() {
     }
   }, [formData.passengers, formData.suitcases, formData.destination]);
 
+  useEffect(() => {
+    if (!formData.returnTrip) {
+      setReturnEstimate({ price: 0, distanceKm: 0, durationMin: 0, isLoading: false, error: '' });
+      return;
+    }
+
+    const origin = formData.returnPickup.trim();
+    const destination = formData.returnDestination.trim();
+
+    if (!origin || !destination) {
+      setReturnEstimate({ price: 0, distanceKm: 0, durationMin: 0, isLoading: false, error: '' });
+      return;
+    }
+
+    if (!hasGoogleMapsApiKey) {
+      setReturnEstimate({
+        price: 0,
+        distanceKm: 0,
+        durationMin: 0,
+        isLoading: false,
+        error: 'Google Maps API key ontbreekt, terugreisprijs kan niet berekend worden.',
+      });
+      return;
+    }
+
+    const googleMaps = (window as any).google?.maps;
+    if (!googleMaps?.DistanceMatrixService) {
+      setReturnEstimate({
+        price: 0,
+        distanceKm: 0,
+        durationMin: 0,
+        isLoading: false,
+        error: 'Google Maps is nog niet geladen. Vul eerst een adres in bij stap 1.',
+      });
+      return;
+    }
+
+    setReturnEstimate((prev) => ({ ...prev, isLoading: true, error: '' }));
+
+    const service = new googleMaps.DistanceMatrixService();
+    service.getDistanceMatrix(
+      {
+        origins: [origin],
+        destinations: [destination],
+        travelMode: googleMaps.TravelMode.DRIVING,
+        unitSystem: googleMaps.UnitSystem.METRIC,
+      },
+      (response: any, status: string) => {
+        if (status !== 'OK' || !response?.rows?.[0]?.elements?.[0]) {
+          setReturnEstimate({
+            price: 0,
+            distanceKm: 0,
+            durationMin: 0,
+            isLoading: false,
+            error: 'Route kon niet berekend worden met Google Maps.',
+          });
+          return;
+        }
+
+        const element = response.rows[0].elements[0];
+        if (element.status !== 'OK' || !element.distance?.value || !element.duration?.value) {
+          setReturnEstimate({
+            price: 0,
+            distanceKm: 0,
+            durationMin: 0,
+            isLoading: false,
+            error: 'Ongeldige route voor terugreis. Controleer de adressen.',
+          });
+          return;
+        }
+
+        const distanceKm = element.distance.value / 1000;
+        const durationMin = element.duration.value / 60;
+        const price = activeReturnTariff.start + distanceKm * activeReturnTariff.perKm + durationMin * activeReturnTariff.perMinute;
+
+        setReturnEstimate({
+          price,
+          distanceKm,
+          durationMin,
+          isLoading: false,
+          error: '',
+        });
+      }
+    );
+  }, [formData.returnTrip, formData.returnPickup, formData.returnDestination, activeReturnTariff.start, activeReturnTariff.perKm, activeReturnTariff.perMinute]);
+
   const handleBookingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -177,8 +271,11 @@ export default function Home() {
     const whatsappNumber = "31752340037";
     const totalPrice = vehicleInfo.price + (formData.paymentMethod === 'pin' ? 5 : 0);
     const paymentMethodLabel = formData.paymentMethod === 'pin' ? 'Pin / Creditcard' : 'Contant';
-    const returnTariff = vehicleInfo.type === 'Sedan' ? METER_TARIFF_2026.Sedan : METER_TARIFF_2026.Taxibus;
     const tripTypeLabel = formData.returnTrip ? 'Heen + terugreis (retour op metertarief)' : 'Enkele reis';
+    const hasReturnEstimate = formData.returnTrip && !returnEstimate.error && returnEstimate.price > 0;
+    const returnStartCost = activeReturnTariff.start;
+    const returnDistanceCost = returnEstimate.distanceKm * activeReturnTariff.perKm;
+    const returnTimeCost = returnEstimate.durationMin * activeReturnTariff.perMinute;
 
     const bookingPayload = {
       name: formData.name,
@@ -196,6 +293,7 @@ export default function Home() {
       returnDestination: formData.returnTrip ? formData.returnDestination : '',
       returnDate: formData.returnTrip ? formData.returnDate : '',
       returnTime: formData.returnTrip ? formData.returnTime : '',
+      returnEstimatedPrice: hasReturnEstimate ? Number(returnEstimate.price.toFixed(2)) : 0,
     };
 
     const message = `*Schiphol Taxi Reservering*%0A%0A` +
@@ -206,13 +304,13 @@ export default function Home() {
       `*Bestemming:* ${formData.destination}%0A` +
       `*Datum:* ${formData.date}%0A` +
       `*Tijd:* ${formData.time}%0A` +
-      `${formData.returnTrip ? `*Retour ophaaladres:* ${formData.returnPickup}%0A*Retour bestemming:* ${formData.returnDestination}%0A*Retourdatum:* ${formData.returnDate}%0A*Retourtijd:* ${formData.returnTime}%0A*Retourtarief (${vehicleInfo.type}):* start €${formatEuro(returnTariff.start)} + €${formatEuro(returnTariff.perKm)}/km + €${formatEuro(returnTariff.perMinute)}/min%0A` : ''}` +
+      `${formData.returnTrip ? `*Retour ophaaladres:* ${formData.returnPickup}%0A*Retour bestemming:* ${formData.returnDestination}%0A*Retourdatum:* ${formData.returnDate}%0A*Retourtijd:* ${formData.returnTime}%0A*Terugreis berekening:* start €${formatEuro(returnStartCost)} + afstand €${formatEuro(returnDistanceCost)} + tijd €${formatEuro(returnTimeCost)}%0A*Geschatte terugreis prijs:* ${hasReturnEstimate ? `€${formatEuro(returnEstimate.price)} (${returnEstimate.distanceKm.toFixed(1)} km · ${Math.round(returnEstimate.durationMin)} min)` : 'Niet beschikbaar'}%0A` : ''}` +
       `*Passagiers:* ${formData.passengers}%0A` +
       `*Koffers:* ${formData.suitcases}%0A` +
       `*Voertuig:* ${vehicleInfo.type}%0A` +
       `*Betaalmethode:* ${formData.paymentMethod === 'pin' ? 'Pin / Creditcard (+€5)' : 'Contant'}%0A` +
       `*Heenreis Prijs:* €${totalPrice}%0A` +
-      `${formData.returnTrip ? '*Terugreis:* Op meter (definitieve prijs op taxameter)' : ''}`;
+      `${formData.returnTrip ? `*Terugreis:* Geschat met Google Maps (${hasReturnEstimate ? `€${formatEuro(returnEstimate.price)}` : 'niet beschikbaar'}), definitieve prijs op taxameter` : ''}`;
 
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${message}`;
 
@@ -699,12 +797,27 @@ export default function Home() {
 
                   {formData.returnTrip && (
                     <div className="p-4 bg-amber-50 rounded-2xl border border-amber-200">
-                      <p className="text-xs font-bold text-amber-700 uppercase tracking-wider mb-1">Terugreis op metertarief (2026)</p>
-                      <p className="text-sm text-stone-700">
-                        {vehicleInfo.type}: start €{formatEuro(vehicleInfo.type === 'Sedan' ? METER_TARIFF_2026.Sedan.start : METER_TARIFF_2026.Taxibus.start)} ·
-                        €{formatEuro(vehicleInfo.type === 'Sedan' ? METER_TARIFF_2026.Sedan.perKm : METER_TARIFF_2026.Taxibus.perKm)}/km ·
-                        €{formatEuro(vehicleInfo.type === 'Sedan' ? METER_TARIFF_2026.Sedan.perMinute : METER_TARIFF_2026.Taxibus.perMinute)}/min
-                      </p>
+                      <p className="text-xs font-bold text-amber-700 uppercase tracking-wider mb-1">Geschatte terugreis prijs</p>
+                      {returnEstimate.isLoading ? (
+                        <p className="text-sm text-stone-700">Prijs wordt berekend via Google Maps...</p>
+                      ) : returnEstimate.error ? (
+                        <p className="text-sm text-red-600">{returnEstimate.error}</p>
+                      ) : returnEstimate.price > 0 ? (
+                        <div className="space-y-1">
+                          <p className="text-2xl font-black text-amber-700">€{formatEuro(returnEstimate.price)}</p>
+                          <p className="text-xs text-stone-600">
+                            Inclusief starttarief: €{formatEuro(activeReturnTariff.start)}
+                          </p>
+                          <p className="text-xs text-stone-600">
+                            Berekening: start €{formatEuro(activeReturnTariff.start)} + afstand €{formatEuro(returnEstimate.distanceKm * activeReturnTariff.perKm)} + tijd €{formatEuro(returnEstimate.durationMin * activeReturnTariff.perMinute)}
+                          </p>
+                          <p className="text-xs text-stone-600">
+                            Op basis van Google Maps: {returnEstimate.distanceKm.toFixed(1)} km · {Math.round(returnEstimate.durationMin)} min
+                          </p>
+                        </div>
+                      ) : (
+                        <p className="text-sm text-stone-700">Vul retour-ophaaladres en retour-bestemming in voor een prijsberekening.</p>
+                      )}
                     </div>
                   )}
 
@@ -753,7 +866,7 @@ export default function Home() {
                       disabled={!formData.name || !formData.phone}
                       className="flex-[2] bg-emerald-600 text-white py-4 rounded-xl font-bold hover:bg-emerald-700 disabled:opacity-50 transition-all shadow-lg shadow-emerald-200"
                     >
-                      Verstuur via WhatsApp & Bevestig ({formData.returnTrip ? `heenreis €${vehicleInfo.price + (formData.paymentMethod === 'pin' ? 5 : 0)} + retour op meter` : `€${vehicleInfo.price + (formData.paymentMethod === 'pin' ? 5 : 0)}`})
+                      Verstuur via WhatsApp & Bevestig ({formData.returnTrip ? `heenreis €${vehicleInfo.price + (formData.paymentMethod === 'pin' ? 5 : 0)} + ${returnEstimate.price > 0 ? `retour ±€${formatEuro(returnEstimate.price)}` : 'retour prijs volgt'}` : `€${vehicleInfo.price + (formData.paymentMethod === 'pin' ? 5 : 0)}`})
                     </button>
                   </div>
                 </motion.div>
