@@ -25,6 +25,7 @@ export default function Admin() {
   const [password, setPassword] = useState('');
   const [token, setToken] = useState('');
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const [dateSortOrder, setDateSortOrder] = useState<'asc' | 'desc'>('asc');
   const [isLoading, setIsLoading] = useState(false);
   const [deletingBookingId, setDeletingBookingId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
@@ -143,6 +144,108 @@ export default function Admin() {
     }
   };
 
+  const parseBookingDate = (value: string): number => {
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return 0;
+    }
+
+    const dutchStyleMatch = trimmed.match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})$/);
+    if (dutchStyleMatch) {
+      const day = Number(dutchStyleMatch[1]);
+      const month = Number(dutchStyleMatch[2]);
+      const year = Number(dutchStyleMatch[3]);
+
+      const parsed = new Date(year, month - 1, day);
+      if (
+        parsed.getFullYear() === year &&
+        parsed.getMonth() === month - 1 &&
+        parsed.getDate() === day
+      ) {
+        return parsed.getTime();
+      }
+    }
+
+    const isoStyleMatch = trimmed.match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})$/);
+    if (isoStyleMatch) {
+      const year = Number(isoStyleMatch[1]);
+      const month = Number(isoStyleMatch[2]);
+      const day = Number(isoStyleMatch[3]);
+
+      const parsed = new Date(year, month - 1, day);
+      if (
+        parsed.getFullYear() === year &&
+        parsed.getMonth() === month - 1 &&
+        parsed.getDate() === day
+      ) {
+        return parsed.getTime();
+      }
+    }
+
+    const directDate = new Date(trimmed);
+    if (!Number.isNaN(directDate.getTime())) {
+      return directDate.getTime();
+    }
+
+    return 0;
+  };
+
+  const formatDateAsDayMonthYear = (value: Date): string => {
+    const day = String(value.getDate()).padStart(2, '0');
+    const month = String(value.getMonth() + 1).padStart(2, '0');
+    const year = value.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
+
+  const buildNightRideLabel = (bookingDate: string, bookingTime: string): string | null => {
+    const bookingDateTimestamp = parseBookingDate(bookingDate);
+    if (!bookingDateTimestamp) {
+      return null;
+    }
+
+    const timeMatch = bookingTime.trim().match(/^(\d{1,2}):(\d{2})$/);
+    if (!timeMatch) {
+      return null;
+    }
+
+    const hour = Number(timeMatch[1]);
+    const minute = Number(timeMatch[2]);
+    if (!Number.isInteger(hour) || !Number.isInteger(minute) || hour < 0 || hour > 23 || minute < 0 || minute > 59) {
+      return null;
+    }
+
+    if (hour >= 7) {
+      return null;
+    }
+
+    const rideDate = new Date(bookingDateTimestamp);
+    const previousDate = new Date(rideDate);
+    previousDate.setDate(previousDate.getDate() - 1);
+
+    return `${formatDateAsDayMonthYear(previousDate)} → nacht van ${formatDateAsDayMonthYear(rideDate)} om ${bookingTime}`;
+  };
+
+  const getTripTypeLabel = (paymentMethod: string): string => {
+    return paymentMethod.includes('Retour op metertarief') ? 'Retour op meter' : 'Enkele reis';
+  };
+
+  const sortedBookings = useMemo(() => {
+    const direction = dateSortOrder === 'asc' ? 1 : -1;
+
+    return [...bookings].sort((left, right) => {
+      const leftDate = parseBookingDate(left.date);
+      const rightDate = parseBookingDate(right.date);
+
+      if (leftDate !== rightDate) {
+        return (leftDate - rightDate) * direction;
+      }
+
+      const leftCreatedAt = new Date(left.createdAt).getTime() || 0;
+      const rightCreatedAt = new Date(right.createdAt).getTime() || 0;
+      return (leftCreatedAt - rightCreatedAt) * direction;
+    });
+  }, [bookings, dateSortOrder]);
+
   if (!isLoggedIn) {
     return (
       <div className="min-h-screen bg-stone-100 flex items-center justify-center px-4 py-10">
@@ -198,6 +301,12 @@ export default function Admin() {
 
           <div className="flex gap-3">
             <button
+              onClick={() => setDateSortOrder((current) => (current === 'desc' ? 'asc' : 'desc'))}
+              className="px-4 py-2 rounded-xl border border-stone-300 bg-white text-stone-700 hover:bg-stone-50"
+            >
+              Sorteer ritdatum: {dateSortOrder === 'asc' ? 'vroegste eerst' : 'laatste eerst'}
+            </button>
+            <button
               onClick={() => loadBookings(token)}
               className="px-4 py-2 rounded-xl border border-stone-300 bg-white text-stone-700 hover:bg-stone-50"
             >
@@ -220,6 +329,7 @@ export default function Admin() {
               <thead className="bg-stone-50 text-stone-600 text-xs uppercase tracking-wide">
                 <tr>
                   <th className="px-4 py-3">Binnengekomen</th>
+                  <th className="px-4 py-3">Rittype</th>
                   <th className="px-4 py-3">Naam</th>
                   <th className="px-4 py-3">Telefoon</th>
                   <th className="px-4 py-3">Ophaaladres</th>
@@ -237,26 +347,37 @@ export default function Admin() {
               <tbody>
                 {isLoading ? (
                   <tr>
-                    <td colSpan={13} className="px-4 py-8 text-center text-stone-500">
+                    <td colSpan={14} className="px-4 py-8 text-center text-stone-500">
                       Laden...
                     </td>
                   </tr>
-                ) : bookings.length === 0 ? (
+                ) : sortedBookings.length === 0 ? (
                   <tr>
-                    <td colSpan={13} className="px-4 py-8 text-center text-stone-500">
+                    <td colSpan={14} className="px-4 py-8 text-center text-stone-500">
                       Nog geen ritten gevonden.
                     </td>
                   </tr>
                 ) : (
-                  bookings.map((booking) => (
+                  sortedBookings.map((booking) => {
+                    const nightRideLabel = buildNightRideLabel(booking.date, booking.time);
+
+                    return (
                     <tr key={booking.id} className="border-t border-stone-100 text-sm text-stone-700">
                       <td className="px-4 py-3 whitespace-nowrap">{new Date(booking.createdAt).toLocaleString('nl-NL')}</td>
+                      <td className="px-4 py-3 whitespace-nowrap">{getTripTypeLabel(booking.paymentMethod)}</td>
                       <td className="px-4 py-3 whitespace-nowrap">{booking.name}</td>
                       <td className="px-4 py-3 whitespace-nowrap">{booking.phone}</td>
                       <td className="px-4 py-3">{booking.pickup}</td>
                       <td className="px-4 py-3 whitespace-nowrap">{booking.destination}</td>
                       <td className="px-4 py-3 whitespace-nowrap">{booking.date}</td>
-                      <td className="px-4 py-3 whitespace-nowrap">{booking.time}</td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <div>{booking.time}</div>
+                        {nightRideLabel && (
+                          <div className="text-xs text-stone-500 mt-1">
+                            {nightRideLabel}
+                          </div>
+                        )}
+                      </td>
                       <td className="px-4 py-3 whitespace-nowrap">{booking.passengers}</td>
                       <td className="px-4 py-3 whitespace-nowrap">{booking.suitcases}</td>
                       <td className="px-4 py-3 whitespace-nowrap">{booking.vehicleType}</td>
@@ -273,7 +394,8 @@ export default function Admin() {
                         </button>
                       </td>
                     </tr>
-                  ))
+                    );
+                  })
                 )}
               </tbody>
             </table>

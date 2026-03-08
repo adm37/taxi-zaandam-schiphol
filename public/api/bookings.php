@@ -224,7 +224,7 @@ if ($method === 'POST') {
             payment_method,
             total_price
           )
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         $stmt = $pdo->prepare($sql);
         $stmt->execute([

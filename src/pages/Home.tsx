@@ -70,6 +70,24 @@ const FAQS = [
   }
 ];
 
+const METER_TARIFF_2026 = {
+  Sedan: {
+    start: 4.31,
+    perKm: 3.17,
+    perMinute: 0.52,
+  },
+  Taxibus: {
+    start: 8.77,
+    perKm: 4.0,
+    perMinute: 0.59,
+  },
+} as const;
+
+const formatEuro = (value: number): string => value.toLocaleString('nl-NL', {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+
 export default function Home() {
   const [bookingStep, setBookingStep] = useState(1);
   const [enableAutocomplete, setEnableAutocomplete] = useState(false);
@@ -79,6 +97,9 @@ export default function Home() {
     destination: 'Schiphol Airport',
     date: '',
     time: '',
+    returnTrip: false,
+    returnDate: '',
+    returnTime: '',
     passengers: 1,
     suitcases: 0,
     paymentMethod: 'contant',
@@ -153,6 +174,10 @@ export default function Home() {
 
     const whatsappNumber = "31752340037";
     const totalPrice = vehicleInfo.price + (formData.paymentMethod === 'pin' ? 5 : 0);
+    const paymentMethodLabel = formData.paymentMethod === 'pin' ? 'Pin / Creditcard' : 'Contant';
+    const returnTariff = vehicleInfo.type === 'Sedan' ? METER_TARIFF_2026.Sedan : METER_TARIFF_2026.Taxibus;
+    const tripTypeLabel = formData.returnTrip ? 'Heen + terugreis (retour op metertarief)' : 'Enkele reis';
+
     const bookingPayload = {
       name: formData.name,
       phone: formData.phone,
@@ -163,9 +188,42 @@ export default function Home() {
       passengers: formData.passengers,
       suitcases: formData.suitcases,
       vehicleType: vehicleInfo.type,
-      paymentMethod: formData.paymentMethod === 'pin' ? 'Pin / Creditcard' : 'Contant',
+      paymentMethod: `${paymentMethodLabel}${formData.returnTrip ? ' | Retour op metertarief' : ''}`,
       totalPrice,
     };
+
+    const message = `*Schiphol Taxi Reservering*%0A%0A` +
+      `*Naam:* ${formData.name}%0A` +
+      `*Telefoon:* ${formData.phone}%0A` +
+      `*Rittype:* ${tripTypeLabel}%0A` +
+      `*Ophaaladres:* ${formattedPickup}%0A` +
+      `*Bestemming:* ${formData.destination}%0A` +
+      `*Datum:* ${formData.date}%0A` +
+      `*Tijd:* ${formData.time}%0A` +
+      `${formData.returnTrip ? `*Retourdatum:* ${formData.returnDate}%0A*Retourtijd:* ${formData.returnTime}%0A*Retourtarief (${vehicleInfo.type}):* start €${formatEuro(returnTariff.start)} + €${formatEuro(returnTariff.perKm)}/km + €${formatEuro(returnTariff.perMinute)}/min%0A` : ''}` +
+      `*Passagiers:* ${formData.passengers}%0A` +
+      `*Koffers:* ${formData.suitcases}%0A` +
+      `*Voertuig:* ${vehicleInfo.type}%0A` +
+      `*Betaalmethode:* ${formData.paymentMethod === 'pin' ? 'Pin / Creditcard (+€5)' : 'Contant'}%0A` +
+      `*Heenreis Prijs:* €${totalPrice}%0A` +
+      `${formData.returnTrip ? '*Terugreis:* Op meter (definitieve prijs op taxameter)' : ''}`;
+
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${message}`;
+
+    const whatsappWindow = window.open(whatsappUrl, '_blank');
+    if (!whatsappWindow) {
+      alert('WhatsApp kon niet worden geopend. Sta pop-ups toe en probeer opnieuw.');
+      return;
+    }
+
+    const hasSentWhatsAppMessage = window.confirm(
+      'Stuur het bericht in WhatsApp en klik daarna op OK. Pas daarna slaan we de boeking op in de database.'
+    );
+
+    if (!hasSentWhatsAppMessage) {
+      alert('Boeking is niet opgeslagen. Open WhatsApp opnieuw en verstuur het bericht om de boeking te voltooien.');
+      return;
+    }
 
     try {
       const saveResponse = await fetch('/api/bookings.php', {
@@ -180,29 +238,11 @@ export default function Home() {
         throw new Error('booking-save-failed');
       }
     } catch {
-      alert('Boeking kon niet worden opgeslagen. Probeer het opnieuw.');
+      alert('WhatsApp-bericht is geopend, maar boeking kon niet worden opgeslagen. Probeer het opnieuw.');
       return;
     }
 
-    const message = `*Schiphol Taxi Reservering*%0A%0A` +
-      `*Naam:* ${formData.name}%0A` +
-      `*Telefoon:* ${formData.phone}%0A` +
-      `*Ophaaladres:* ${formattedPickup}%0A` +
-      `*Bestemming:* ${formData.destination}%0A` +
-      `*Datum:* ${formData.date}%0A` +
-      `*Tijd:* ${formData.time}%0A` +
-      `*Passagiers:* ${formData.passengers}%0A` +
-      `*Koffers:* ${formData.suitcases}%0A` +
-      `*Voertuig:* ${vehicleInfo.type}%0A` +
-      `*Betaalmethode:* ${formData.paymentMethod === 'pin' ? 'Pin / Creditcard (+€5)' : 'Contant'}%0A` +
-      `*Totaal Prijs:* €${totalPrice}`;
-
-    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${message}`;
-    
-    // Open WhatsApp in a new tab
-    window.open(whatsappUrl, '_blank');
-
-    alert(`Bedankt voor uw aanvraag, ${formData.name}! Uw boeking wordt nu geopend in WhatsApp.`);
+    alert(`Bedankt voor uw aanvraag, ${formData.name}! Uw WhatsApp-bericht is verstuurd en de boeking staat in ons systeem.`);
     
     setBookingStep(1);
     setFormData({
@@ -211,6 +251,9 @@ export default function Home() {
       destination: 'Schiphol Airport',
       date: '',
       time: '',
+      returnTrip: false,
+      returnDate: '',
+      returnTime: '',
       passengers: 1,
       suitcases: 0,
       paymentMethod: 'contant',
@@ -464,11 +507,59 @@ export default function Home() {
                       </div>
                     </div>
                   </div>
+
+                  <div className="p-4 bg-stone-50 border border-stone-200 rounded-2xl space-y-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-bold text-stone-900">Terugreis toevoegen</p>
+                        <p className="text-xs text-stone-500">Heenreis blijft vast tarief, terugreis is op meter.</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setFormData((prev) => ({
+                          ...prev,
+                          returnTrip: !prev.returnTrip,
+                          returnDate: !prev.returnTrip ? prev.returnDate : '',
+                          returnTime: !prev.returnTrip ? prev.returnTime : '',
+                        }))}
+                        className={`px-4 py-2 rounded-xl border font-bold transition-all ${formData.returnTrip ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-stone-700 border-stone-300 hover:bg-stone-100'}`}
+                      >
+                        {formData.returnTrip ? 'Ja, terugreis' : 'Nee, enkele reis'}
+                      </button>
+                    </div>
+
+                    {formData.returnTrip && (
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-bold text-stone-400 uppercase mb-2">Retourdatum</label>
+                          <input
+                            type="date"
+                            required={formData.returnTrip}
+                            min={formData.date || today}
+                            className="w-full px-4 py-3 bg-white border border-stone-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"
+                            value={formData.returnDate}
+                            onChange={(e) => setFormData({...formData, returnDate: e.target.value})}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-stone-400 uppercase mb-2">Retourtijd</label>
+                          <input
+                            type="time"
+                            required={formData.returnTrip}
+                            className="w-full px-4 py-3 bg-white border border-stone-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"
+                            value={formData.returnTime}
+                            onChange={(e) => setFormData({...formData, returnTime: e.target.value})}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
                   <div className="flex gap-4">
                     <button type="button" onClick={() => setBookingStep(1)} className="flex-1 bg-stone-100 text-stone-600 py-4 rounded-xl font-bold hover:bg-stone-200 transition-all">Terug</button>
                     <button 
                       type="button"
-                      disabled={!formData.date || !formData.time}
+                      disabled={!formData.date || !formData.time || (formData.returnTrip && (!formData.returnDate || !formData.returnTime))}
                       onClick={() => setBookingStep(3)}
                       className="flex-[2] bg-emerald-600 text-white py-4 rounded-xl font-bold hover:bg-emerald-700 disabled:opacity-50 transition-all flex items-center justify-center gap-2 group"
                     >
@@ -549,10 +640,21 @@ export default function Home() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-xs font-bold text-stone-400 uppercase tracking-wider">Totaal Prijs</p>
+                      <p className="text-xs font-bold text-stone-400 uppercase tracking-wider">Heenreis Prijs</p>
                       <p className="text-2xl font-black text-emerald-600">€{vehicleInfo.price + (formData.paymentMethod === 'pin' ? 5 : 0)}</p>
                     </div>
                   </div>
+
+                  {formData.returnTrip && (
+                    <div className="p-4 bg-amber-50 rounded-2xl border border-amber-200">
+                      <p className="text-xs font-bold text-amber-700 uppercase tracking-wider mb-1">Terugreis op metertarief (2026)</p>
+                      <p className="text-sm text-stone-700">
+                        {vehicleInfo.type}: start €{formatEuro(vehicleInfo.type === 'Sedan' ? METER_TARIFF_2026.Sedan.start : METER_TARIFF_2026.Taxibus.start)} ·
+                        €{formatEuro(vehicleInfo.type === 'Sedan' ? METER_TARIFF_2026.Sedan.perKm : METER_TARIFF_2026.Taxibus.perKm)}/km ·
+                        €{formatEuro(vehicleInfo.type === 'Sedan' ? METER_TARIFF_2026.Sedan.perMinute : METER_TARIFF_2026.Taxibus.perMinute)}/min
+                      </p>
+                    </div>
+                  )}
 
                   <div className="flex gap-4">
                     <button type="button" onClick={() => setBookingStep(2)} className="flex-1 bg-stone-100 text-stone-600 py-4 rounded-xl font-bold hover:bg-stone-200 transition-all">Terug</button>
@@ -599,7 +701,7 @@ export default function Home() {
                       disabled={!formData.name || !formData.phone}
                       className="flex-[2] bg-emerald-600 text-white py-4 rounded-xl font-bold hover:bg-emerald-700 disabled:opacity-50 transition-all shadow-lg shadow-emerald-200"
                     >
-                      Bevestig Boeking (€{vehicleInfo.price + (formData.paymentMethod === 'pin' ? 5 : 0)})
+                      Verstuur via WhatsApp & Bevestig ({formData.returnTrip ? `heenreis €${vehicleInfo.price + (formData.paymentMethod === 'pin' ? 5 : 0)} + retour op meter` : `€${vehicleInfo.price + (formData.paymentMethod === 'pin' ? 5 : 0)}`})
                     </button>
                   </div>
                 </motion.div>
