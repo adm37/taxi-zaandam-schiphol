@@ -65,11 +65,31 @@ async function ensureTableExists() {
       vehicle_type VARCHAR(80) NOT NULL,
       payment_method VARCHAR(80) NOT NULL,
       total_price DECIMAL(10,2) NOT NULL DEFAULT 0,
+      return_pickup VARCHAR(255) NULL,
+      return_destination VARCHAR(255) NULL,
+      return_date VARCHAR(30) NULL,
+      return_time VARCHAR(30) NULL,
       PRIMARY KEY (id),
       KEY idx_created_at (created_at)
     )`;
 
-    ensureTablePromise = getPool().query(createTableSql);
+    ensureTablePromise = (async () => {
+      await getPool().query(createTableSql);
+
+      const requiredColumns = [
+        ['return_pickup', `ALTER TABLE ${SAFE_TABLE_NAME} ADD COLUMN return_pickup VARCHAR(255) NULL AFTER total_price`],
+        ['return_destination', `ALTER TABLE ${SAFE_TABLE_NAME} ADD COLUMN return_destination VARCHAR(255) NULL AFTER return_pickup`],
+        ['return_date', `ALTER TABLE ${SAFE_TABLE_NAME} ADD COLUMN return_date VARCHAR(30) NULL AFTER return_destination`],
+        ['return_time', `ALTER TABLE ${SAFE_TABLE_NAME} ADD COLUMN return_time VARCHAR(30) NULL AFTER return_date`],
+      ];
+
+      for (const [columnName, alterSql] of requiredColumns) {
+        const [rows] = await getPool().query(`SHOW COLUMNS FROM ${SAFE_TABLE_NAME} LIKE ?`, [columnName]);
+        if (!Array.isArray(rows) || rows.length === 0) {
+          await getPool().query(alterSql);
+        }
+      }
+    })();
   }
 
   await ensureTablePromise;
@@ -171,7 +191,11 @@ exports.handler = async (event) => {
           suitcases,
           vehicle_type AS vehicleType,
           payment_method AS paymentMethod,
-          total_price AS totalPrice
+          total_price AS totalPrice,
+          return_pickup AS returnPickup,
+          return_destination AS returnDestination,
+          return_date AS returnDate,
+          return_time AS returnTime
         FROM ${SAFE_TABLE_NAME}
         ORDER BY created_at DESC
         LIMIT 2000`
@@ -234,6 +258,10 @@ exports.handler = async (event) => {
         vehicleType: String(payload.vehicleType || '').trim(),
         paymentMethod: String(payload.paymentMethod || '').trim(),
         totalPrice: toSafeNumber(payload.totalPrice, 0),
+        returnPickup: String(payload.returnPickup || '').trim(),
+        returnDestination: String(payload.returnDestination || '').trim(),
+        returnDate: String(payload.returnDate || '').trim(),
+        returnTime: String(payload.returnTime || '').trim(),
       };
 
       await ensureTableExists();
@@ -250,9 +278,13 @@ exports.handler = async (event) => {
           suitcases,
           vehicle_type,
           payment_method,
-          total_price
+          total_price,
+          return_pickup,
+          return_destination,
+          return_date,
+          return_time
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
       const [result] = await getPool().execute(insertSql, [
         booking.name,
@@ -266,6 +298,10 @@ exports.handler = async (event) => {
         booking.vehicleType,
         booking.paymentMethod,
         booking.totalPrice,
+        booking.returnPickup || null,
+        booking.returnDestination || null,
+        booking.returnDate || null,
+        booking.returnTime || null,
       ]);
 
       return {
@@ -284,6 +320,72 @@ exports.handler = async (event) => {
           'Cache-Control': 'no-store',
         },
         body: JSON.stringify({ error: 'Could not save booking to database' }),
+      };
+    }
+  }
+
+  if (event.httpMethod === 'DELETE') {
+    if (!isAuthorized(event.headers)) {
+      return unauthorizedResponse();
+    }
+
+    if (!hasDatabaseConfig()) {
+      return {
+        statusCode: 500,
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-store',
+        },
+        body: JSON.stringify({ error: 'Missing Hostinger database configuration' }),
+      };
+    }
+
+    try {
+      await ensureTableExists();
+
+      const payload = JSON.parse(event.body || '{}');
+      const bookingId = Number.parseInt(String(payload.id ?? ''), 10);
+
+      if (!Number.isInteger(bookingId) || bookingId <= 0) {
+        return {
+          statusCode: 400,
+          headers: {
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-store',
+          },
+          body: JSON.stringify({ error: 'Missing or invalid booking id' }),
+        };
+      }
+
+      const [result] = await getPool().execute(`DELETE FROM ${SAFE_TABLE_NAME} WHERE id = ? LIMIT 1`, [bookingId]);
+
+      if (!result || result.affectedRows === 0) {
+        return {
+          statusCode: 404,
+          headers: {
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-store',
+          },
+          body: JSON.stringify({ error: 'Booking not found' }),
+        };
+      }
+
+      return {
+        statusCode: 200,
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-store',
+        },
+        body: JSON.stringify({ ok: true, deletedId: bookingId }),
+      };
+    } catch {
+      return {
+        statusCode: 500,
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-store',
+        },
+        body: JSON.stringify({ error: 'Could not delete booking' }),
       };
     }
   }

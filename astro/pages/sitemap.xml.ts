@@ -12,7 +12,7 @@ const airportSlugs = [
 ];
 
 export const GET: APIRoute = () => {
-  const baseUrl = 'https://www.zaantaxischiphol.nl';
+  const baseUrl = (import.meta.env.PUBLIC_SITE_URL || 'https://zaantaxischiphol.nl').replace(/\/$/, '');
   const locationSlugs = Object.keys(locationsData);
 
   const withTrailingSlash = (route: string): string => {

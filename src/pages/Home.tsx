@@ -316,17 +316,7 @@ export default function Home() {
 
     const whatsappWindow = window.open(whatsappUrl, '_blank');
     if (!whatsappWindow) {
-      alert('WhatsApp kon niet worden geopend. Sta pop-ups toe en probeer opnieuw.');
-      return;
-    }
-
-    const hasSentWhatsAppMessage = window.confirm(
-      'Stuur het bericht in WhatsApp en klik daarna op OK. Pas daarna slaan we de boeking op in de database.'
-    );
-
-    if (!hasSentWhatsAppMessage) {
-      alert('Boeking is niet opgeslagen. Open WhatsApp opnieuw en verstuur het bericht om de boeking te voltooien.');
-      return;
+      alert('WhatsApp kon niet worden geopend. De boeking wordt wel opgeslagen in het systeem.');
     }
 
     try {
@@ -342,11 +332,15 @@ export default function Home() {
         throw new Error('booking-save-failed');
       }
     } catch {
-      alert('WhatsApp-bericht is geopend, maar boeking kon niet worden opgeslagen. Probeer het opnieuw.');
+      alert('Boeking kon niet worden opgeslagen in het systeem. Probeer het opnieuw.');
       return;
     }
 
-    alert(`Bedankt voor uw aanvraag, ${formData.name}! Uw WhatsApp-bericht is verstuurd en de boeking staat in ons systeem.`);
+    if (whatsappWindow) {
+      alert(`Bedankt voor uw aanvraag, ${formData.name}! Uw WhatsApp-bericht is geopend en de boeking staat in ons systeem.`);
+    } else {
+      alert(`Bedankt voor uw aanvraag, ${formData.name}! De boeking staat in ons systeem.`);
+    }
     
     setBookingStep(1);
     setFormData({
