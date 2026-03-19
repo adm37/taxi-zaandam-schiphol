@@ -18,7 +18,7 @@ export interface SeoMetadata {
 
 type SeoMetadataOverride = Partial<SeoMetadata> & Pick<SeoMetadata, 'title' | 'description'>;
 
-const siteUrl = (import.meta.env.PUBLIC_SITE_URL || 'https://zaantaxischiphol.nl').replace(/\/$/, '');
+const siteUrl = (import.meta.env.PUBLIC_SITE_URL || 'https://www.zaantaxischiphol.nl').replace(/\/$/, '');
 
 function absoluteUrl(pathname: string): string {
   if (!pathname || pathname === '/') {
