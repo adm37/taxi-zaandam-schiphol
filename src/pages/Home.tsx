@@ -17,8 +17,7 @@ import {
   HelpCircle,
   Users,
   Briefcase,
-  Car,
-  Bus
+  Car
 } from 'lucide-react';
 
 const LazyAutocomplete = lazy(
@@ -76,11 +75,6 @@ const METER_TARIFF_2026 = {
     perKm: 3.17,
     perMinute: 0.52,
   },
-  Taxibus: {
-    start: 8.77,
-    perKm: 4.0,
-    perMinute: 0.59,
-  },
 } as const;
 
 const formatEuro = (value: number): string => value.toLocaleString('nl-NL', {
@@ -121,54 +115,38 @@ export default function Home() {
     isLoading: false,
     error: '',
   });
-  const activeReturnTariff = vehicleInfo.type === 'Sedan' ? METER_TARIFF_2026.Sedan : METER_TARIFF_2026.Taxibus;
+  const activeReturnTariff = METER_TARIFF_2026.Sedan;
 
   useEffect(() => {
     applySeoForPath('/');
   }, []);
 
   useEffect(() => {
-    // Logic for vehicle selection
-    // Sedan: 1-4 passengers, max 3 suitcases
-    // Bus: selected when suitcases exceed sedan capacity (> 3)
-    let isBus = false;
-    if (formData.passengers > 4 || formData.suitcases > 3) {
-      isBus = true;
-    }
-
     let price = 0;
     switch (formData.destination) {
       case 'Rotterdam The Hague Airport':
-        price = isBus ? 200 : 165;
+        price = 165;
         break;
       case 'Eindhoven Airport':
-        price = isBus ? 365 : 295;
+        price = 295;
         break;
       case 'Brussels Airport (Zaventem)':
-        price = isBus ? 590 : 480;
+        price = 480;
         break;
       case 'Düsseldorf Airport':
-        price = isBus ? 580 : 470;
+        price = 470;
         break;
       case 'Schiphol Airport':
       default:
-        price = isBus ? 75 : 50;
+        price = 50;
         break;
     }
 
-    if (isBus) {
-      setVehicleInfo({
-        type: 'Taxibus',
-        price: price,
-        icon: Bus
-      });
-    } else {
-      setVehicleInfo({
-        type: 'Sedan',
-        price: price,
-        icon: Car
-      });
-    }
+    setVehicleInfo({
+      type: 'Sedan',
+      price: price,
+      icon: Car
+    });
   }, [formData.passengers, formData.suitcases, formData.destination]);
 
   useEffect(() => {
@@ -739,7 +717,7 @@ export default function Home() {
                           value={formData.suitcases}
                           onChange={(e) => setFormData({...formData, suitcases: parseInt(e.target.value)})}
                         >
-                          {[0,1,2,3,4,5,6,7,8].map(n => <option key={n} value={n}>{n} {n === 1 ? 'Koffer' : 'Koffers'}</option>)}
+                          {[0,1,2,3].map(n => <option key={n} value={n}>{n} {n === 1 ? 'Koffer' : 'Koffers'}</option>)}
                         </select>
                       </div>
                     </div>
@@ -776,11 +754,7 @@ export default function Home() {
                       <div>
                         <p className="text-xs font-bold text-emerald-600 uppercase tracking-wider">Geselecteerd voertuig</p>
                         <p className="font-bold text-stone-900">{vehicleInfo.type}</p>
-                        <p className="text-[10px] text-stone-500">
-                          {vehicleInfo.type === 'Sedan' 
-                            ? 'Max. 4 pers. & 3 koffers' 
-                            : 'Max. 7 pers. & 8 koffers'}
-                        </p>
+                        <p className="text-[10px] text-stone-500">Max. 4 pers. & 3 koffers</p>
                       </div>
                     </div>
                     <div className="text-right">
