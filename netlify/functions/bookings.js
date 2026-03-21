@@ -253,7 +253,7 @@ exports.handler = async (event) => {
         destination: String(payload.destination || '').trim(),
         date: String(payload.date || '').trim(),
         time: String(payload.time || '').trim(),
-        passengers: toSafeInt(payload.passengers, 1),
+        passengers: Math.min(4, Math.max(1, toSafeInt(payload.passengers, 1))),
         suitcases: toSafeInt(payload.suitcases, 0),
         vehicleType: String(payload.vehicleType || '').trim(),
         paymentMethod: String(payload.paymentMethod || '').trim(),

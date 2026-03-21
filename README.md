@@ -29,15 +29,15 @@ Voor adres-autocomplete in het boekingsformulier moet tijdens build/deploy een G
 
 Zorg ook dat in Google Cloud de **Places API** en **Maps JavaScript API** aan staan, en dat de HTTP referrer van je live domein is toegestaan.
 
-## Contactformulier via Mail API (Netlify)
+## Hosting op Hostinger (zonder Netlify)
 
-Het contactformulier gebruikt `/.netlify/functions/send-contact-email` en verstuurt e-mail via Resend.
+Deze website draait op Hostinger en gebruikt PHP-endpoints in `public/api`.
 
-Zet in Netlify bij **Site configuration → Environment variables**:
+Belangrijk:
 
-- `RESEND_API_KEY` = je Resend API key
-- `CONTACT_FORM_TO_EMAIL` = `ademsade@gmail.com`
-- `CONTACT_FORM_FROM_EMAIL` = geverifieerd afzenderadres in Resend (of laat fallback op `onboarding@resend.dev` voor testen)
+- Gebruik voor boekingen en admin alleen ` /api/bookings.php`.
+- Vul databasegegevens in via `public/api/config.php`.
+- Netlify functions zijn niet nodig in productie op Hostinger.
 
 ## Boekingen opslaan in Hostinger database
 

@@ -130,7 +130,7 @@ export default function Home() {
   useEffect(() => {
     // Logic for vehicle selection
     // Sedan: 1-4 passengers, max 3 suitcases
-    // Bus: 5-7 passengers, or > 3 suitcases
+    // Bus: selected when suitcases exceed sedan capacity (> 3)
     let isBus = false;
     if (formData.passengers > 4 || formData.suitcases > 3) {
       isBus = true;
@@ -726,7 +726,7 @@ export default function Home() {
                           value={formData.passengers}
                           onChange={(e) => setFormData({...formData, passengers: parseInt(e.target.value)})}
                         >
-                          {[1,2,3,4,5,6,7].map(n => <option key={n} value={n}>{n} {n === 1 ? 'Persoon' : 'Personen'}</option>)}
+                          {[1,2,3,4].map(n => <option key={n} value={n}>{n} {n === 1 ? 'Persoon' : 'Personen'}</option>)}
                         </select>
                       </div>
                     </div>

@@ -230,7 +230,7 @@ if ($method === 'POST') {
         'destination' => trim((string)$payload['destination']),
         'date' => trim((string)$payload['date']),
         'time' => trim((string)$payload['time']),
-        'passengers' => max(1, (int)($payload['passengers'] ?? 1)),
+        'passengers' => min(4, max(1, (int)($payload['passengers'] ?? 1))),
         'suitcases' => max(0, (int)($payload['suitcases'] ?? 0)),
         'vehicleType' => trim((string)($payload['vehicleType'] ?? '')),
         'paymentMethod' => trim((string)($payload['paymentMethod'] ?? '')),
