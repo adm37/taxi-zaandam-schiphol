@@ -704,7 +704,7 @@ export default function Home() {
                           value={formData.passengers}
                           onChange={(e) => setFormData({...formData, passengers: parseInt(e.target.value)})}
                         >
-                          {[1,2,3,4].map(n => <option key={n} value={n}>{n} {n === 1 ? 'Persoon' : 'Personen'}</option>)}
+                          {[1,2,3].map(n => <option key={n} value={n}>{n} {n === 1 ? 'Persoon' : 'Personen'}</option>)}
                         </select>
                       </div>
                     </div>
@@ -717,7 +717,7 @@ export default function Home() {
                           value={formData.suitcases}
                           onChange={(e) => setFormData({...formData, suitcases: parseInt(e.target.value)})}
                         >
-                          {[0,1,2,3].map(n => <option key={n} value={n}>{n} {n === 1 ? 'Koffer' : 'Koffers'}</option>)}
+                          {[0,1,2].map(n => <option key={n} value={n}>{n} {n === 1 ? 'Koffer' : 'Koffers'}</option>)}
                         </select>
                       </div>
                     </div>
