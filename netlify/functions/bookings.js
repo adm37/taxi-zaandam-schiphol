@@ -253,8 +253,8 @@ exports.handler = async (event) => {
         destination: String(payload.destination || '').trim(),
         date: String(payload.date || '').trim(),
         time: String(payload.time || '').trim(),
-        passengers: Math.min(4, Math.max(1, toSafeInt(payload.passengers, 1))),
-        suitcases: toSafeInt(payload.suitcases, 0),
+        passengers: Math.min(3, Math.max(1, toSafeInt(payload.passengers, 1))),
+        suitcases: Math.min(2, Math.max(0, toSafeInt(payload.suitcases, 0))),
         vehicleType: String(payload.vehicleType || '').trim(),
         paymentMethod: String(payload.paymentMethod || '').trim(),
         totalPrice: toSafeNumber(payload.totalPrice, 0),
@@ -265,6 +265,27 @@ exports.handler = async (event) => {
       };
 
       await ensureTableExists();
+
+      // Check if there are already 2 bookings at this time slot
+      const [existingBookings] = await getPool().query(
+        `SELECT COUNT(*) as count FROM ${SAFE_TABLE_NAME} WHERE date = ? AND time = ?`,
+        [booking.date, booking.time]
+      );
+
+      const bookingCount = existingBookings[0]?.count || 0;
+      if (bookingCount >= 2) {
+        return {
+          statusCode: 409,
+          headers: {
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-store',
+          },
+          body: JSON.stringify({ 
+            error: 'Booking slot full',
+            message: `Dit tijdslot is vol. Maximaal 2 auto's kunnen op hetzelfde moment geboekt worden. Kies alstublieft een ander tijdstip.`
+          }),
+        };
+      }
 
       const insertSql = `INSERT INTO ${SAFE_TABLE_NAME}
         (

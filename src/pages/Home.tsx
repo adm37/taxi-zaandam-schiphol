@@ -85,6 +85,7 @@ const formatEuro = (value: number): string => value.toLocaleString('nl-NL', {
 export default function Home() {
   const [bookingStep, setBookingStep] = useState(1);
   const [enableAutocomplete, setEnableAutocomplete] = useState(false);
+  const [slotWarning, setSlotWarning] = useState('');
   const [formData, setFormData] = useState({
     pickup: '',
     houseNumber: '',
@@ -120,6 +121,41 @@ export default function Home() {
   useEffect(() => {
     applySeoForPath('/');
   }, []);
+
+  // Check slot availability when date/time changes
+  useEffect(() => {
+    if (!formData.date || !formData.time) {
+      setSlotWarning('');
+      return;
+    }
+
+    const checkSlotAvailability = async () => {
+      try {
+        const response = await fetch('/api/bookings.php');
+        if (!response.ok) return;
+        
+        const data = await response.json();
+        const bookings = data.bookings || [];
+        
+        const sameTimeBookings = bookings.filter(
+          (b: any) => b.date === formData.date && b.time === formData.time
+        );
+        
+        if (sameTimeBookings.length >= 2) {
+          const nextHour = String(parseInt(formData.time.split(':')[0]) + 1).padStart(2, '0') + ':' + formData.time.split(':')[1];
+          setSlotWarning(`⚠️ Dit tijdslot is vol (2 auto's geboekt). Volgende beschikbare tijd: ${nextHour}`);
+        } else if (sameTimeBookings.length === 1) {
+          setSlotWarning(`ℹ️ Nog 1 auto beschikbaar op dit moment.`);
+        } else {
+          setSlotWarning('');
+        }
+      } catch {
+        setSlotWarning('');
+      }
+    };
+
+    checkSlotAvailability();
+  }, [formData.date, formData.time]);
 
   useEffect(() => {
     let price = 0;
@@ -307,6 +343,13 @@ export default function Home() {
       });
 
       if (!saveResponse.ok) {
+        const errorData = await saveResponse.json().catch(() => ({}));
+        
+        if (saveResponse.status === 409) {
+          alert(`Dit tijdslot is vol. Wij kunnen maar 2 auto's tegelijk inzetten. Kies alstublieft een ander moment.\n\nHuidige tijd: ${formData.time}\nSuggestie: +1 uur later`);
+          return;
+        }
+        
         throw new Error('booking-save-failed');
       }
     } catch {
@@ -583,6 +626,9 @@ export default function Home() {
                           onChange={(e) => setFormData({...formData, time: e.target.value})}
                         />
                       </div>
+                      {slotWarning && (
+                        <p className="text-xs mt-2 text-amber-700 bg-amber-50 p-2 rounded-lg">{slotWarning}</p>
+                      )}
                     </div>
                   </div>
 
