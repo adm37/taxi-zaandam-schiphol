@@ -8,21 +8,21 @@ import OtherAirportsLinks from './components/OtherAirportsLinks';
 
 export default function Zaandam() {
   React.useEffect(() => {
-    document.title = "Taxi Zaandam Schiphol €50 - Vaste Prijs | ZaanTaxi Schiphol";
+    document.title = "Taxi Zaandam Schiphol €75 - Vaste Prijs | ZaanTaxi Schiphol";
     const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) metaDesc.setAttribute('content', "Taxi Zaandam Schiphol nodig? Reis voor een vast tarief van €50. 24/7 service in heel Zaandam inclusief Poelenburg, Westerwatering en 't Kalf. Veilig, snel en comfortabel.");
+    if (metaDesc) metaDesc.setAttribute('content', "Taxi Zaandam Schiphol nodig? Reis voor een vast tarief van €75. 24/7 service in heel Zaandam inclusief Poelenburg, Westerwatering en 't Kalf. Veilig, snel en comfortabel.");
     
     // JSON-LD for Local Business / Taxi Service
     const schemaData = {
       "@context": "https://schema.org",
       "@type": "TaxiService",
       "name": "ZaanTaxi Schiphol - Zaandam",
-      "description": "De beste taxi service van Zaandam naar Schiphol voor een vast tarief van €50.",
+      "description": "De beste taxi service van Zaandam naar Schiphol voor een vast tarief van €75.",
       "provider": {
         "@type": "LocalBusiness",
         "name": "ZaanTaxi Schiphol",
         "telephone": "+31752340037",
-        "priceRange": "€50",
+        "priceRange": "€75",
         "address": {
           "@type": "PostalAddress",
           "addressLocality": "Zaandam",
@@ -44,7 +44,7 @@ export default function Zaandam() {
               "@type": "Service",
               "name": "Taxi Sedan Zaandam naar Schiphol"
             },
-            "price": "50.00",
+            "price": "75.00",
             "priceCurrency": "EUR"
           },
           {
@@ -89,7 +89,7 @@ export default function Zaandam() {
                 Betrouwbare Taxi van <span className="text-emerald-600">Zaandam</span> naar Schiphol
               </h1>
               <p className="text-xl text-stone-600 mb-8 max-w-2xl">
-                Reis zorgeloos en comfortabel van Zaandam naar Schiphol voor het vaste lage tarief van <span className="font-bold text-emerald-600">€50</span>. Geen verborgen kosten, 24/7 beschikbaar.
+                Reis zorgeloos en comfortabel van Zaandam naar Schiphol voor het vaste lage tarief van <span className="font-bold text-emerald-600">€75</span>. Geen verborgen kosten, 24/7 beschikbaar.
               </p>
               <div className="flex flex-wrap justify-center lg:justify-start gap-4 mb-12">
                 <Link to="/" className="bg-emerald-600 text-white px-8 py-4 rounded-xl font-bold hover:bg-emerald-700 shadow-lg shadow-emerald-200 transition-all flex items-center gap-2">
@@ -118,7 +118,7 @@ export default function Zaandam() {
                 className="rounded-3xl shadow-2xl"
               />
               <div className="absolute -bottom-6 -left-6 bg-white p-6 rounded-2xl shadow-xl border border-stone-100">
-                <p className="text-emerald-600 font-black text-3xl">€50</p>
+                <p className="text-emerald-600 font-black text-3xl">€75</p>
                 <p className="text-stone-400 text-xs font-bold uppercase tracking-widest">Vast Tarief</p>
               </div>
             </div>
@@ -157,7 +157,7 @@ export default function Zaandam() {
                 <div className="p-6 rounded-2xl bg-stone-50 border border-stone-100">
                   <Banknote className="text-emerald-600 mb-4" size={32} />
                   <h3 className="text-xl font-bold mb-2 text-stone-900">Vaste Lage Prijs</h3>
-                  <p className="text-stone-500 text-sm">Geen tikkende meter of verrassingen achteraf. U betaalt altijd €50 voor een sedan van Zaandam naar Schiphol.</p>
+                  <p className="text-stone-500 text-sm">Geen tikkende meter of verrassingen achteraf. U betaalt altijd €75 voor een sedan van Zaandam naar Schiphol.</p>
                 </div>
                 <div className="p-6 rounded-2xl bg-stone-50 border border-stone-100">
                   <ThumbsUp className="text-emerald-600 mb-4" size={32} />
@@ -194,7 +194,7 @@ export default function Zaandam() {
                       <p className="font-bold text-lg">Standaard Sedan</p>
                       <p className="text-stone-400 text-xs">1-4 Personen</p>
                     </div>
-                    <span className="text-2xl font-black text-emerald-400">€50</span>
+                    <span className="text-2xl font-black text-emerald-400">€75</span>
                   </div>
                   <div className="flex justify-between items-center pb-4 border-b border-stone-800">
                     <div>
@@ -256,7 +256,7 @@ export default function Zaandam() {
           <h2 className="text-3xl font-bold mb-12">Wat onze klanten in Zaandam zeggen</h2>
           <div className="grid md:grid-cols-3 gap-8">
             {[
-              { name: 'Mark V.', text: 'Altijd op tijd en een zeer nette auto. Voor €50 van Zaandam naar Schiphol is echt een koopje.' },
+              { name: 'Mark V.', text: 'Altijd op tijd en een zeer nette auto. Voor €75 van Zaandam naar Schiphol is echt een koopje.' },
               { name: 'Linda de B.', text: 'Vriendelijke chauffeur die hielp met de koffers. De WiFi in de taxi was erg handig voor mijn werk.' },
               { name: 'Ahmed K.', text: 'Onze vaste keuze voor vakanties. De taxibus is ideaal voor ons gezin van 6 personen.' }
             ].map((review, i) => (

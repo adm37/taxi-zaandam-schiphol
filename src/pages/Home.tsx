@@ -41,7 +41,7 @@ const ZAANSTAD_LOCATIONS = [
 const FAQS = [
   {
     question: "Wat kost een taxi van Zaanstad naar Schiphol?",
-    answer: "Bij ZaanTaxi Schiphol betaalt u een vast tarief van slechts €50 vanuit elke plek in Zaanstad (Zaandam, Krommenie, Assendelft, etc.) naar Schiphol Airport."
+    answer: "Bij ZaanTaxi Schiphol betaalt u een vast tarief van slechts €75 vanuit elke plek in Zaanstad (Zaandam, Krommenie, Assendelft, etc.) naar Schiphol Airport."
   },
   {
     question: "Hoeveel kost een taxi naar Schiphol?",
@@ -105,7 +105,7 @@ export default function Home() {
 
   const [vehicleInfo, setVehicleInfo] = useState({
     type: 'Sedan',
-    price: 50,
+    price: 75,
     icon: Car
   });
   const [returnEstimate, setReturnEstimate] = useState({
@@ -138,7 +138,7 @@ export default function Home() {
         break;
       case 'Schiphol Airport':
       default:
-        price = 50;
+        price = 75;
         break;
     }
 
@@ -348,7 +348,7 @@ export default function Home() {
       "@context": "https://schema.org",
       "@type": "LocalBusiness",
       "name": "ZaanTaxi Schiphol",
-      "description": "Betrouwbare taxi service van Zaanstad naar Schiphol voor een vast tarief van €50.",
+      "description": "Betrouwbare taxi service van Zaanstad naar Schiphol voor een vast tarief van €75.",
       "url": window.location.origin,
       "telephone": "+31752340037",
       "address": {
@@ -363,7 +363,7 @@ export default function Home() {
         "longitude": "4.8292"
       },
       "areaServed": ["Zaandam", "Krommenie", "Assendelft", "Wormer", "Wormerveer", "Zaandijk", "Koog aan de Zaan", "Westzaan"],
-      "priceRange": "€50"
+      "priceRange": "€75"
     };
 
     const script = document.createElement('script');
@@ -411,7 +411,7 @@ export default function Home() {
               Taxi Zaanstad Schiphol Specialist
             </div>
             <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-stone-900 mb-6 leading-[1.1]">
-              Taxi van <span className="text-emerald-600">Zaanstad</span> naar Schiphol voor <span className="text-emerald-600">€50</span>
+              Taxi van <span className="text-emerald-600">Zaanstad</span> naar Schiphol voor <span className="text-emerald-600">€75</span>
             </h1>
             <p className="text-xl text-stone-600 mb-8 max-w-lg leading-relaxed">
               Zoekt u een betrouwbare taxi van Zaandam, Krommenie, Assendelft of Wormer naar Schiphol? Bij ons profiteert u van een <strong>vast laag tarief</strong> zonder verrassingen.
@@ -859,7 +859,7 @@ export default function Home() {
                   Wanneer u op reis gaat, wilt u zich geen zorgen maken over het vervoer naar de luchthaven. ZaanTaxi Schiphol is de specialist in <strong>luchthavenvervoer vanuit de Zaanstreek</strong>. Of u nu in Zaandam, Krommenie, Assendelft, Wormer of Wormerveer woont, wij staan voor u klaar.
                 </p>
                 <p>
-                  Onze dienstverlening kenmerkt zich door stiptheid, comfort en transparantie. Met ons <strong>vaste tarief van €50</strong> weet u precies waar u aan toe bent. Geen tikkende meters in de file op de A8 of A10, maar een eerlijke prijs voor een hoogwaardige rit.
+                  Onze dienstverlening kenmerkt zich door stiptheid, comfort en transparantie. Met ons <strong>vaste tarief van €75</strong> weet u precies waar u aan toe bent. Geen tikkende meters in de file op de A8 of A10, maar een eerlijke prijs voor een hoogwaardige rit.
                 </p>
                 <h3 className="text-xl font-bold text-stone-900 pt-4">Voordelen van ZaanTaxi Schiphol:</h3>
                 <ul className="list-none space-y-2">
@@ -921,7 +921,7 @@ export default function Home() {
                     <h3 className="font-bold text-stone-900 group-hover:text-emerald-700 transition-colors">{loc}</h3>
                   </div>
                   <p className="text-stone-500 text-sm leading-relaxed">
-                    {descriptions[loc] || `Professioneel taxi vervoer van ${loc} naar Schiphol voor €50.`}
+                    {descriptions[loc] || `Professioneel taxi vervoer van ${loc} naar Schiphol voor €75.`}
                   </p>
                   <div className="mt-4 flex items-center gap-1 text-emerald-600 text-xs font-bold uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity">
                     Bekijk Tarieven <ChevronRight size={14} />
@@ -966,7 +966,7 @@ export default function Home() {
         <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
           <div className="flex whitespace-nowrap animate-marquee">
             {[...Array(10)].map((_, i) => (
-              <span key={i} className="text-9xl font-black text-white mx-8">€50 VASTE PRIJS</span>
+              <span key={i} className="text-9xl font-black text-white mx-8">€75 VASTE PRIJS</span>
             ))}
           </div>
         </div>
@@ -975,7 +975,7 @@ export default function Home() {
             Betrouwbaar Luchthavenvervoer
           </h2>
           <p className="text-emerald-100 text-lg font-medium">
-            Vanuit Zaandam, Krommenie, Assendelft, Wormer of Wormerveer: Altijd €50 naar Schiphol.
+            Vanuit Zaandam, Krommenie, Assendelft, Wormer of Wormerveer: Altijd €75 naar Schiphol.
           </p>
         </div>
       </section>

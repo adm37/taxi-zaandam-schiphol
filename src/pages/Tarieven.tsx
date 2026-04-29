@@ -31,7 +31,7 @@ export default function Tarieven() {
                 <p className="text-stone-500 text-sm">Ideaal voor 1-4 personen</p>
               </div>
               <div className="mb-8">
-                <span className="text-4xl font-black text-emerald-600">€50</span>
+                <span className="text-4xl font-black text-emerald-600">€75</span>
                 <span className="text-stone-400 ml-2">vast tarief</span>
               </div>
               <ul className="space-y-4 mb-8 flex-grow">

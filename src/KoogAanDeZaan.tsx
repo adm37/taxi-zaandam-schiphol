@@ -8,21 +8,21 @@ import OtherAirportsLinks from './components/OtherAirportsLinks';
 
 export default function KoogAanDeZaan() {
   React.useEffect(() => {
-    document.title = "Taxi Koog aan de Zaan Schiphol €50 | 24/7 Service | ZaanTaxi Schiphol";
+    document.title = "Taxi Koog aan de Zaan Schiphol €75 | 24/7 Service | ZaanTaxi Schiphol";
     const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) metaDesc.setAttribute('content', "Taxi Koog aan de Zaan Schiphol nodig? Reis voor een vast tarief van €50. 24/7 service in heel Koog aan de Zaan inclusief Westerkoog en Oud-Koog. Veilig, snel en comfortabel.");
+    if (metaDesc) metaDesc.setAttribute('content', "Taxi Koog aan de Zaan Schiphol nodig? Reis voor een vast tarief van €75. 24/7 service in heel Koog aan de Zaan inclusief Westerkoog en Oud-Koog. Veilig, snel en comfortabel.");
     
     // JSON-LD for Local Business / Taxi Service
     const schemaData = {
       "@context": "https://schema.org",
       "@type": "TaxiService",
       "name": "ZaanTaxi Schiphol - Koog aan de Zaan",
-      "description": "De beste taxi service van Koog aan de Zaan naar Schiphol voor een vast tarief van €50.",
+      "description": "De beste taxi service van Koog aan de Zaan naar Schiphol voor een vast tarief van €75.",
       "provider": {
         "@type": "LocalBusiness",
         "name": "ZaanTaxi Schiphol",
         "telephone": "+31752340037",
-        "priceRange": "€50",
+        "priceRange": "€75",
         "address": {
           "@type": "PostalAddress",
           "addressLocality": "Koog aan de Zaan",
@@ -44,7 +44,7 @@ export default function KoogAanDeZaan() {
               "@type": "Service",
               "name": "Taxi Sedan Koog aan de Zaan naar Schiphol"
             },
-            "price": "50.00",
+            "price": "75.00",
             "priceCurrency": "EUR"
           },
           {
@@ -89,7 +89,7 @@ export default function KoogAanDeZaan() {
                 Betrouwbare Taxi van <span className="text-emerald-600">Koog aan de Zaan</span> naar Schiphol
               </h1>
               <p className="text-xl text-stone-600 mb-8 max-w-2xl">
-                Reis zorgeloos en comfortabel van Koog aan de Zaan naar Schiphol voor het vaste lage tarief van <span className="font-bold text-emerald-600">€50</span>. Geen verborgen kosten, 24/7 beschikbaar.
+                Reis zorgeloos en comfortabel van Koog aan de Zaan naar Schiphol voor het vaste lage tarief van <span className="font-bold text-emerald-600">€75</span>. Geen verborgen kosten, 24/7 beschikbaar.
               </p>
               <div className="flex flex-wrap justify-center lg:justify-start gap-4 mb-12">
                 <Link to="/" className="bg-emerald-600 text-white px-8 py-4 rounded-xl font-bold hover:bg-emerald-700 shadow-lg shadow-emerald-200 transition-all flex items-center gap-2">
@@ -118,7 +118,7 @@ export default function KoogAanDeZaan() {
                 className="rounded-3xl shadow-2xl"
               />
               <div className="absolute -bottom-6 -left-6 bg-white p-6 rounded-2xl shadow-xl border border-stone-100">
-                <p className="text-emerald-600 font-black text-3xl">€50</p>
+                <p className="text-emerald-600 font-black text-3xl">€75</p>
                 <p className="text-stone-400 text-xs font-bold uppercase tracking-widest">Vast Tarief</p>
               </div>
             </div>
@@ -157,7 +157,7 @@ export default function KoogAanDeZaan() {
                 <div className="p-6 rounded-2xl bg-stone-50 border border-stone-100">
                   <Banknote className="text-emerald-600 mb-4" size={32} />
                   <h3 className="text-xl font-bold mb-2 text-stone-900">Vaste Lage Prijs</h3>
-                  <p className="text-stone-500 text-sm">Geen tikkende meter of verrassingen achteraf. U betaalt altijd €50 voor een sedan van Koog aan de Zaan naar Schiphol.</p>
+                  <p className="text-stone-500 text-sm">Geen tikkende meter of verrassingen achteraf. U betaalt altijd €75 voor een sedan van Koog aan de Zaan naar Schiphol.</p>
                 </div>
                 <div className="p-6 rounded-2xl bg-stone-50 border border-stone-100">
                   <ThumbsUp className="text-emerald-600 mb-4" size={32} />
@@ -192,7 +192,7 @@ export default function KoogAanDeZaan() {
                       <p className="font-bold text-lg">Standaard Sedan</p>
                       <p className="text-stone-400 text-xs">1-4 Personen</p>
                     </div>
-                    <span className="text-2xl font-black text-emerald-400">€50</span>
+                    <span className="text-2xl font-black text-emerald-400">€75</span>
                   </div>
                   <div className="flex justify-between items-center pb-4 border-b border-stone-800">
                     <div>
@@ -255,7 +255,7 @@ export default function KoogAanDeZaan() {
           <div className="grid md:grid-cols-3 gap-8">
             {[
               { name: 'Robert K.', text: 'Keurige service. De chauffeur was precies op tijd bij station Koog aan de Zaan.' },
-              { name: 'Ellen M.', text: 'Vaste prijs van €50 is erg fijn. Geen verrassingen achteraf.' },
+              { name: 'Ellen M.', text: 'Vaste prijs van €75 is erg fijn. Geen verrassingen achteraf.' },
               { name: 'Dirk van V.', text: 'Wij gebruiken ZaanTaxi Schiphol altijd voor onze zakelijke reizen vanuit Westerkoog.' }
             ].map((review, i) => (
               <div key={i} className="bg-white p-8 rounded-3xl shadow-sm border border-stone-200">

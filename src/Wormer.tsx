@@ -8,21 +8,21 @@ import OtherAirportsLinks from './components/OtherAirportsLinks';
 
 export default function Wormer() {
   React.useEffect(() => {
-    document.title = "Taxi Wormer Schiphol €50 - Vaste Prijs Garantie | ZaanTaxi Schiphol";
+    document.title = "Taxi Wormer Schiphol €75 - Vaste Prijs Garantie | ZaanTaxi Schiphol";
     const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) metaDesc.setAttribute('content', "Taxi Wormer Schiphol nodig? Reis voor een vast tarief van €50. 24/7 service in heel Wormer. Veilig, snel en comfortabel luchthavenvervoer vanuit Wormer.");
+    if (metaDesc) metaDesc.setAttribute('content', "Taxi Wormer Schiphol nodig? Reis voor een vast tarief van €75. 24/7 service in heel Wormer. Veilig, snel en comfortabel luchthavenvervoer vanuit Wormer.");
     
     // JSON-LD for Local Business / Taxi Service
     const schemaData = {
       "@context": "https://schema.org",
       "@type": "TaxiService",
       "name": "ZaanTaxi Schiphol - Wormer",
-      "description": "De beste taxi service van Wormer naar Schiphol voor een vast tarief van €50.",
+      "description": "De beste taxi service van Wormer naar Schiphol voor een vast tarief van €75.",
       "provider": {
         "@type": "LocalBusiness",
         "name": "ZaanTaxi Schiphol",
         "telephone": "+31752340037",
-        "priceRange": "€50",
+        "priceRange": "€75",
         "address": {
           "@type": "PostalAddress",
           "addressLocality": "Wormer",
@@ -44,7 +44,7 @@ export default function Wormer() {
               "@type": "Service",
               "name": "Taxi Sedan Wormer naar Schiphol"
             },
-            "price": "50.00",
+            "price": "75.00",
             "priceCurrency": "EUR"
           },
           {
@@ -89,7 +89,7 @@ export default function Wormer() {
                 Betrouwbare Taxi van <span className="text-emerald-600">Wormer</span> naar Schiphol
               </h1>
               <p className="text-xl text-stone-600 mb-8 max-w-2xl">
-                Reis zorgeloos en comfortabel van Wormer naar Schiphol voor het vaste lage tarief van <span className="font-bold text-emerald-600">€50</span>. Geen verborgen kosten, 24/7 beschikbaar.
+                Reis zorgeloos en comfortabel van Wormer naar Schiphol voor het vaste lage tarief van <span className="font-bold text-emerald-600">€75</span>. Geen verborgen kosten, 24/7 beschikbaar.
               </p>
               <div className="flex flex-wrap justify-center lg:justify-start gap-4 mb-12">
                 <Link to="/" className="bg-emerald-600 text-white px-8 py-4 rounded-xl font-bold hover:bg-emerald-700 shadow-lg shadow-emerald-200 transition-all flex items-center gap-2">
@@ -118,7 +118,7 @@ export default function Wormer() {
                 className="rounded-3xl shadow-2xl"
               />
               <div className="absolute -bottom-6 -left-6 bg-white p-6 rounded-2xl shadow-xl border border-stone-100">
-                <p className="text-emerald-600 font-black text-3xl">€50</p>
+                <p className="text-emerald-600 font-black text-3xl">€75</p>
                 <p className="text-stone-400 text-xs font-bold uppercase tracking-widest">Vast Tarief</p>
               </div>
             </div>
@@ -138,7 +138,7 @@ export default function Wormer() {
                     Bent u op zoek naar een <strong>taxi in Wormer</strong> die u veilig, snel en tegen een scherp tarief naar Schiphol brengt? ZaanTaxi Schiphol is uw lokale partner voor hoogwaardig luchthavenvervoer. Wij begrijpen dat uw reis begint bij de voordeur, en daarom zorgen wij voor een zorgeloze start.
                   </p>
                   <p>
-                    Zoekt u een taxi in Wormer voor vervoer naar Schiphol? Wij staan voor u klaar in heel Wormer. Voor een vast bedrag van €50 rijden wij u rechtstreeks naar de luchthaven. Geen gedoe met parkeren of openbaar vervoer, maar de luxe van een privé taxi.
+                    Zoekt u een taxi in Wormer voor vervoer naar Schiphol? Wij staan voor u klaar in heel Wormer. Voor een vast bedrag van €75 rijden wij u rechtstreeks naar de luchthaven. Geen gedoe met parkeren of openbaar vervoer, maar de luxe van een privé taxi.
                   </p>
                 </div>
               </div>
@@ -157,7 +157,7 @@ export default function Wormer() {
                 <div className="p-6 rounded-2xl bg-stone-50 border border-stone-100">
                   <Banknote className="text-emerald-600 mb-4" size={32} />
                   <h3 className="text-xl font-bold mb-2 text-stone-900">Vaste Lage Prijs</h3>
-                  <p className="text-stone-500 text-sm">Geen tikkende meter of verrassingen achteraf. U betaalt altijd €50 voor een sedan van Wormer naar Schiphol.</p>
+                  <p className="text-stone-500 text-sm">Geen tikkende meter of verrassingen achteraf. U betaalt altijd €75 voor een sedan van Wormer naar Schiphol.</p>
                 </div>
                 <div className="p-6 rounded-2xl bg-stone-50 border border-stone-100">
                   <ThumbsUp className="text-emerald-600 mb-4" size={32} />
@@ -170,7 +170,7 @@ export default function Wormer() {
                 <h2 className="text-2xl font-bold mb-6 text-stone-900">Waarom ZaanTaxi Schiphol in Wormer?</h2>
                 <ul className="list-none space-y-3">
                   <li className="flex items-start gap-3"><ThumbsUp size={20} className="text-emerald-500 mt-1" /><span><strong>Lokaal & Bekend:</strong> Wij kennen Wormer als geen ander.</span></li>
-                  <li className="flex items-start gap-3"><Banknote size={20} className="text-emerald-500 mt-1" /><span><strong>Geen Meter:</strong> Vaste prijs van €50.</span></li>
+                  <li className="flex items-start gap-3"><Banknote size={20} className="text-emerald-500 mt-1" /><span><strong>Geen Meter:</strong> Vaste prijs van €75.</span></li>
                 </ul>
               </div>
             </div>
@@ -184,7 +184,7 @@ export default function Wormer() {
                       <p className="font-bold text-lg">Standaard Sedan</p>
                       <p className="text-stone-400 text-xs">1-4 Personen</p>
                     </div>
-                    <span className="text-2xl font-black text-emerald-400">€50</span>
+                    <span className="text-2xl font-black text-emerald-400">€75</span>
                   </div>
                   <div className="flex justify-between items-center pb-4 border-b border-stone-800">
                     <div>
@@ -247,7 +247,7 @@ export default function Wormer() {
           <div className="grid md:grid-cols-3 gap-8">
             {[
               { name: 'Sander P.', text: 'Fijne rit gehad. De chauffeur was keurig op tijd in Wormer en hielp me met mijn koffers.' },
-              { name: 'Karin de R.', text: 'Vaste prijs van €50 is erg fijn. Geen verrassingen achteraf.' },
+              { name: 'Karin de R.', text: 'Vaste prijs van €75 is erg fijn. Geen verrassingen achteraf.' },
               { name: 'Willem H.', text: 'Wij gebruiken ZaanTaxi Schiphol altijd voor onze vakanties vanuit Wormer.' }
             ].map((review, i) => (
               <div key={i} className="bg-white p-8 rounded-3xl shadow-sm border border-stone-200">
