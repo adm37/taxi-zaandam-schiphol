@@ -66,6 +66,10 @@ const FAQS = [
   {
     question: "Kan ik met pin of creditcard betalen?",
     answer: "Zeker! Al onze taxi's zijn uitgerust met moderne pinautomaten. U kunt betalen met Pin, Creditcard of contant."
+  },
+  {
+    question: "Bagage afmetingen",
+    answer: "Wil je 3 koffers probleemloos kwijt: houd per koffer aan: ± 70 × 45 × 25 cm (max). Als de koffers niet passen omdat niet aan deze afmetingen is voldaan, blijft het volledige ritbedrag verschuldigd. De klant is zelf verantwoordelijk dat de koffers passen. Wij plaatsen geen koffers op de achterbank of op andere zitplaatsen vanwege mogelijke beschadigingen aan de auto."
   }
 ];
 
@@ -75,6 +79,11 @@ const METER_TARIFF_2026 = {
     perKm: 3.17,
     perMinute: 0.52,
   },
+} as const;
+
+const SEDAN_CAPACITY = {
+  passengers: 4,
+  suitcases: 3,
 } as const;
 
 const formatEuro = (value: number): string => value.toLocaleString('nl-NL', {
@@ -753,9 +762,11 @@ export default function Home() {
                         <select 
                           className="w-full pl-10 pr-4 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none appearance-none"
                           value={formData.passengers}
-                          onChange={(e) => setFormData({...formData, passengers: parseInt(e.target.value)})}
+                          onChange={(e) => setFormData({...formData, passengers: Math.min(SEDAN_CAPACITY.passengers, parseInt(e.target.value))})}
                         >
-                          {[1,2,3].map(n => <option key={n} value={n}>{n} {n === 1 ? 'Persoon' : 'Personen'}</option>)}
+                          {Array.from({ length: SEDAN_CAPACITY.passengers }, (_, index) => index + 1).map((n) => (
+                            <option key={n} value={n}>{n} {n === 1 ? 'Persoon' : 'Personen'}</option>
+                          ))}
                         </select>
                       </div>
                     </div>
@@ -766,9 +777,11 @@ export default function Home() {
                         <select 
                           className="w-full pl-10 pr-4 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none appearance-none"
                           value={formData.suitcases}
-                          onChange={(e) => setFormData({...formData, suitcases: parseInt(e.target.value)})}
+                          onChange={(e) => setFormData({...formData, suitcases: Math.min(SEDAN_CAPACITY.suitcases, parseInt(e.target.value))})}
                         >
-                          {[0,1,2].map(n => <option key={n} value={n}>{n} {n === 1 ? 'Koffer' : 'Koffers'}</option>)}
+                          {Array.from({ length: SEDAN_CAPACITY.suitcases + 1 }, (_, index) => index).map((n) => (
+                            <option key={n} value={n}>{n} {n === 1 ? 'Koffer' : 'Koffers'}</option>
+                          ))}
                         </select>
                       </div>
                     </div>
@@ -805,7 +818,9 @@ export default function Home() {
                       <div>
                         <p className="text-xs font-bold text-emerald-600 uppercase tracking-wider">Geselecteerd voertuig</p>
                         <p className="font-bold text-stone-900">{vehicleInfo.type}</p>
-                        <p className="text-[10px] text-stone-500">Max. 4 pers. & 3 koffers</p>
+                        <p className="text-[10px] text-stone-500">
+                          {formData.passengers} {formData.passengers === 1 ? 'passagier' : 'passagiers'} & {formData.suitcases} {formData.suitcases === 1 ? 'koffer' : 'koffers'} geselecteerd (max. {SEDAN_CAPACITY.passengers} passagiers en {SEDAN_CAPACITY.suitcases} koffers)
+                        </p>
                       </div>
                     </div>
                     <div className="text-right">
