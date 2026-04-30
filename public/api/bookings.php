@@ -162,6 +162,17 @@ function isAuthorized(array $config): bool
     return $username === $expectedUsername && $password === $expectedPassword;
 }
 
+function getNextTimeSlot(string $time): string
+{
+    $parsed = DateTime::createFromFormat('H:i', $time);
+    if (!$parsed) {
+        return $time;
+    }
+
+    $parsed->modify('+1 hour');
+    return $parsed->format('H:i');
+}
+
 $method = strtoupper((string)($_SERVER['REQUEST_METHOD'] ?? 'GET'));
 
 try {
@@ -173,6 +184,35 @@ try {
 }
 
 if ($method === 'GET') {
+    $isAvailabilityRequest = isset($_GET['availability'])
+        && ($_GET['availability'] === '1' || $_GET['availability'] === 'true');
+
+    if ($isAvailabilityRequest) {
+        $date = trim((string)($_GET['date'] ?? ''));
+        $time = trim((string)($_GET['time'] ?? ''));
+
+        if ($date === '' || $time === '') {
+            jsonResponse(400, ['error' => 'Missing date or time']);
+        }
+
+        try {
+            $stmt = $pdo->prepare("SELECT COUNT(*) AS count FROM {$tableName} WHERE date = ? AND time = ?");
+            $stmt->execute([$date, $time]);
+            $count = (int)$stmt->fetchColumn();
+
+            jsonResponse(200, [
+                'date' => $date,
+                'time' => $time,
+                'bookingsAtSlot' => $count,
+                'remainingCars' => max(0, 2 - $count),
+                'isFull' => $count >= 2,
+                'nextSuggestedTime' => getNextTimeSlot($time),
+            ]);
+        } catch (Throwable $error) {
+            jsonResponse(500, ['error' => 'Could not check slot availability']);
+        }
+    }
+
     if (!isAuthorized($config)) {
         header('WWW-Authenticate: Basic realm="Admin dashboard"');
         jsonResponse(401, ['error' => 'Unauthorized']);
@@ -242,6 +282,18 @@ if ($method === 'POST') {
     ];
 
     try {
+        $slotCheck = $pdo->prepare("SELECT COUNT(*) AS count FROM {$tableName} WHERE date = ? AND time = ?");
+        $slotCheck->execute([$booking['date'], $booking['time']]);
+        $slotCount = (int)$slotCheck->fetchColumn();
+
+        if ($slotCount >= 2) {
+            jsonResponse(409, [
+                'error' => 'Selected time slot is full',
+                'date' => $booking['date'],
+                'time' => $booking['time'],
+            ]);
+        }
+
         $sql = "INSERT INTO {$tableName}
           (
             name,

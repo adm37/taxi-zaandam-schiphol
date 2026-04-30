@@ -131,20 +131,25 @@ export default function Home() {
 
     const checkSlotAvailability = async () => {
       try {
-        const response = await fetch('/api/bookings.php');
+        const query = new URLSearchParams({
+          availability: '1',
+          date: formData.date,
+          time: formData.time,
+        });
+
+        const response = await fetch(`/api/bookings.php?${query.toString()}`);
         if (!response.ok) return;
         
         const data = await response.json();
-        const bookings = data.bookings || [];
-        
-        const sameTimeBookings = bookings.filter(
-          (b: any) => b.date === formData.date && b.time === formData.time
-        );
-        
-        if (sameTimeBookings.length >= 2) {
+        const bookingsAtSlot = Number(data.bookingsAtSlot ?? 0);
+
+        if (bookingsAtSlot >= 2) {
           const nextHour = String(parseInt(formData.time.split(':')[0]) + 1).padStart(2, '0') + ':' + formData.time.split(':')[1];
-          setSlotWarning(`⚠️ Dit tijdslot is vol (2 auto's geboekt). Volgende beschikbare tijd: ${nextHour}`);
-        } else if (sameTimeBookings.length === 1) {
+          const nextSuggestedTime = typeof data.nextSuggestedTime === 'string' && data.nextSuggestedTime.trim() !== ''
+            ? data.nextSuggestedTime
+            : nextHour;
+          setSlotWarning(`⚠️ Dit tijdslot is vol (2 auto's geboekt). Volgende beschikbare tijd: ${nextSuggestedTime}`);
+        } else if (bookingsAtSlot === 1) {
           setSlotWarning(`ℹ️ Nog 1 auto beschikbaar op dit moment.`);
         } else {
           setSlotWarning('');
